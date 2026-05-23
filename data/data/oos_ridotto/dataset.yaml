@@ -1,0 +1,20 @@
+# dataset.yaml — OOS Ridotto
+# Generato da prepara_oos_ridotto.py
+# Dataset separato da data/processed/ — non modificare quello!
+
+path:  C:/Users/186337/Desktop/Progetto tesi/data/oos_ridotto
+
+train: images/train   # 473 immagini
+val:   images/val     # 101 immagini
+test:  images/test    # 103 immagini
+
+nc: 2
+names:
+  0: empty_shelf
+  1: full_shelf
+
+# Note
+# - Solo immagini store OOS con label YOLO non vuoti
+# - Video privati esclusi (nessuna annotation disponibile)
+# - Filtro blur: soglia_store=300 (varianza Laplaciano)
+# - Campionamento stratificato per store, cap 20% per fonte

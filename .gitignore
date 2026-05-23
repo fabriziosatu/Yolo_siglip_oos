@@ -1,0 +1,19 @@
+tesi_env/
+weights/
+logs/
+*.pt
+*.pkl
+.venv/
+__pycache__/
+.DS_Store
+
+# Escludi l'intera cartella dei dati pesanti
+data/oos_ridotto/
+data/processed/
+
+# Se vuoi essere sicuro di non caricare mai immagini o file zip estratti per errore
+*.jpg
+*.jpeg
+*.png
+*.zip
+*.tar.gz

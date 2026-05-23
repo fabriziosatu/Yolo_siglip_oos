@@ -1,0 +1,8 @@
+path:  /home/F.SATURNINO/Progetto tesi/data/processed
+train: images/train
+val:   images/val
+test:  images/test
+nc: 2
+names:
+  0: empty_shelf
+  1: full_shelf
