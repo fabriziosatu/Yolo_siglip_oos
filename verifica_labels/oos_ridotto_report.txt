@@ -1,0 +1,28 @@
+============================================================
+  VERIFICA LABEL — OOS_RIDOTTO
+============================================================
+  Dataset: C:\Users\186337\Desktop\Progetto tesi\data\oos_ridotto
+
+  [TRAIN]
+    Immagini totali       : 473
+    Immagini senza label  : 0
+    Box totali            : 1832
+    Box medie per immagine: 3.87
+    Dimensione media box  : w=0.163  h=0.200  (normalizzata)
+    ✅ Nessuna box fuori range trovata nel campione
+
+  [VAL]
+    Immagini totali       : 101
+    Immagini senza label  : 0
+    Box totali            : 405
+    Box medie per immagine: 4.01
+    Dimensione media box  : w=0.161  h=0.188  (normalizzata)
+    ✅ Nessuna box fuori range trovata nel campione
+
+  [TEST]
+    Immagini totali       : 103
+    Immagini senza label  : 0
+    Box totali            : 408
+    Box medie per immagine: 3.96
+    Dimensione media box  : w=0.180  h=0.202  (normalizzata)
+    ⚠ Box fuori range (1 immagini): ['store9__store9_50.jpg']

@@ -22,10 +22,11 @@ from src.utils.config import CFG
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fase 1 — Training YOLO26 standalone")
-    parser.add_argument("--epochs",  type=int, default=30,      help="Numero di epoche")
-    parser.add_argument("--batch",   type=int, default=8,       help="Batch size")
-    parser.add_argument("--imgsz",   type=int, default=640,     help="Dimensione immagine")
-    parser.add_argument("--device",  type=str, default="0",     help="Device (0=GPU, cpu)")
+    parser.add_argument("--epochs",  type=int, default=30,               help="Numero di epoche")
+    parser.add_argument("--batch",   type=int, default=8,                help="Batch size")
+    parser.add_argument("--imgsz",   type=int, default=640,              help="Dimensione immagine")
+    parser.add_argument("--device",  type=str, default="0",              help="Device (0=GPU, cpu)")
+    parser.add_argument("--name",    type=str, default="phase1_yolo",    help="Nome cartella output")
     return parser.parse_args()
 
 
@@ -36,7 +37,7 @@ def main():
 
     # Percorsi dal config
     yaml_path   = CFG.data.dataset_yaml
-    save_dir    = Path("weights/cluster_training/phase1_yolo")
+    save_dir     = Path("weights/cluster_training") / args.name
     best_weights = save_dir / "weights/best.pt"
 
     print("=" * 60)
@@ -61,7 +62,7 @@ def main():
         imgsz         = args.imgsz,
         device        = args.device,
         project       = "weights/cluster_training",
-        name          = "phase1_yolo",
+        name          = args.name,
         exist_ok      = True,
         lr0           = 1e-3,
         lrf           = 0.01,

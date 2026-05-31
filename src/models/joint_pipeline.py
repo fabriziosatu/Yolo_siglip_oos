@@ -1,18 +1,29 @@
 """
 src/models/joint_pipeline.py
 =============================
-Pipeline joint YOLO26 + SigLIPv2 con predizioni completamente differenziabili.
+Pipeline joint completa: YOLO26 + SigLIPv2 con RoI Align.
 
-Flusso:
-  1. YOLO26 forward (train mode) con DetectNoDetach
-     -> predizioni (B, 8400, 6) con grad_fn
-     -> feature map (B, 128, 40, 40) con grad_fn
-  2. IoU matching (conf>=0.1) -> label ROI
-  3. Crop reali dall'immagine originale con padding 15%
-  4. SigLIPv2(LoRA) + MLP -> logit binario su immagini RGB reali
-  5. RoI Align sulla feature map -> solo per il backward differenziabile
-  6. L_joint = alpha*L_YOLO(CIoU+BCE) + beta*L_SigLIP
-     -> un solo backward aggiorna entrambi i modelli
+Flusso forward:
+  1. YOLO26  → predizioni (B, 300, 6) + feature map (B, 128, 40, 40)
+  2. Filtra predizioni per confidence threshold
+  3. IoU matching con GT → assegna label alle ROI di YOLO
+       IoU >= iou_pos_thr → positivo (label=1, empty_shelf confermato)
+       IoU <  iou_neg_thr → negativo da YOLO (label=0, falso positivo)
+       zona intermedia    → scartato (ambiguo)
+  4. Negative mining sintetico → aggiunge ROI casuali che non si
+     sovrappongono con nessuna GT (label=0, scaffale pieno per esclusione)
+  5. RoI Align → crop (N_total, 128, 7, 7)
+  6. Proiezione + resize → (N_total, 3, 224, 224)
+  7. SigLIPv2 + MLP → logit binario (N_total, 1)
+
+Negative mining sintetico:
+  Campiona ROI casuali sull'immagine e le accetta solo se hanno
+  IoU < neg_iou_max con tutte le GT box (empty_shelf).
+  L'assunzione e' valida per dataset di scaffali: la maggior parte
+  dell'area e' occupata da prodotti, quindi una box casuale che non
+  si sovrappone con nessuno spazio vuoto cade quasi certamente su
+  un prodotto o uno scaffale pieno.
+  Il bilanciamento e' 1:1 rispetto ai positivi trovati da YOLO.
 """
 
 import torch
@@ -23,34 +34,33 @@ from torchvision.ops import roi_align, box_iou
 from src.models.detector      import YOLO26Detector, FEATURE_STRIDE, FEATURE_CHANNELS
 from src.models.siglip_module import SigLIPModule
 
-ROI_OUTPUT_SIZE    = 7
-IOU_THRESHOLD      = 0.3
-ROI_PADDING        = 0.15   # padding 15% attorno alla bbox (paper DRIVE)
-MAX_ROIS_PER_BATCH = 64     # cap ROI per batch — bilancia velocità e copertura
+
+ROI_OUTPUT_SIZE = 7
 
 
 class JointPipeline(nn.Module):
 
     def __init__(
         self,
-        yolo_weights:      str   = "yolo26n.pt",
-        siglip_model_name: str   = "google/siglip2-base-patch16-224",
-        conf_threshold:    float = 0.25,
-        lora_r_visual:     int   = 4,
-        lora_alpha_visual: int   = 8,
-        lora_dropout:      float = 0.15,
-        mlp_hidden:        list  = None,
-        mlp_dropout:       float = 0.30,
-        roi_size:          int   = 224,
-        roi_padding:       float = ROI_PADDING,
+        yolo_weights      = "yolo26n.pt",
+        siglip_model_name = "google/siglip2-base-patch16-224",
+        conf_threshold    = 0.25,
+        lora_r_visual     = 4,
+        lora_alpha_visual = 8,
+        lora_dropout      = 0.10,
+        roi_size          = 224,
+        iou_pos_thr       = 0.30,
+        iou_neg_thr       = 0.10,
+        n_neg_synthetic   = 4,
+        neg_iou_max       = 0.10,
     ):
         super().__init__()
 
-        if mlp_hidden is None:
-            mlp_hidden = [256, 64]
-
-        self.roi_size    = roi_size
-        self.roi_padding = roi_padding
+        self.roi_size        = roi_size
+        self.iou_pos_thr     = iou_pos_thr
+        self.iou_neg_thr     = iou_neg_thr
+        self.n_neg_synthetic = n_neg_synthetic
+        self.neg_iou_max     = neg_iou_max
 
         print("\n[1/2] Carico YOLO26...")
         self.detector = YOLO26Detector(
@@ -58,144 +68,68 @@ class JointPipeline(nn.Module):
             conf_threshold = conf_threshold,
         )
 
-        print("\n[2/2] Carico SigLIPv2 + LoRA + MLP...")
+        print("\n[2/2] Carico SigLIPv2 + LoRA...")
         self.siglip = SigLIPModule(
             model_name        = siglip_model_name,
             lora_r_visual     = lora_r_visual,
             lora_alpha_visual = lora_alpha_visual,
             lora_dropout      = lora_dropout,
-            mlp_hidden        = mlp_hidden,
-            mlp_dropout       = mlp_dropout,
         )
 
-        # Feature projection: usata solo per il backward differenziabile
         self.feature_proj = nn.Sequential(
             nn.Conv2d(FEATURE_CHANNELS, 3, kernel_size=1, bias=False),
             nn.BatchNorm2d(3),
             nn.ReLU(inplace=True),
         )
 
-    def _assign_roi_labels(self, filtered_preds, gt_boxes, img_size=640):
-        """Assegna label alle ROI tramite IoU matching con le GT box."""
-        all_labels = []
-        for preds, gt in zip(filtered_preds, gt_boxes):
-            if len(preds) == 0:
-                continue
-            pred_boxes = preds[:, :4]
-
-            if len(gt) == 0:
-                all_labels.append(
-                    torch.zeros(len(preds), dtype=torch.long, device=preds.device)
-                )
-                continue
-
-            gt = gt.to(preds.device)
-            xc, yc, w, h = gt[:,0], gt[:,1], gt[:,2], gt[:,3]
-            gt_xyxy = torch.stack([
-                (xc - w/2) * img_size, (yc - h/2) * img_size,
-                (xc + w/2) * img_size, (yc + h/2) * img_size,
-            ], dim=1)
-
-            with torch.no_grad():
-                iou_matrix = box_iou(pred_boxes.detach(), gt_xyxy)
-                max_iou, _ = iou_matrix.max(dim=1)
-            labels = (max_iou >= IOU_THRESHOLD).long()
-            all_labels.append(labels)
-
-        if all_labels:
-            return torch.cat(all_labels, dim=0)
-        return torch.zeros(0, dtype=torch.long)
-
-    def _crop_from_image(self, images, rois, roi_size):
+    def forward(self, images, gt_boxes=None, gt_labels=None):
         """
-        Ritaglia crop reali dall'immagine originale con padding 15%.
-        Versione vettorizzata: un solo F.interpolate su tutti i crop.
-        """
-        H, W = images.shape[2], images.shape[3]
-        N    = rois.shape[0]
-
-        # Preallooca il tensore output
-        crops = torch.zeros(N, 3, roi_size, roi_size,
-                            device=images.device, dtype=images.dtype)
-
-        for i, roi in enumerate(rois):
-            batch_idx = int(roi[0].item())
-            x1 = roi[1].item();  y1 = roi[2].item()
-            x2 = roi[3].item();  y2 = roi[4].item()
-
-            pw = (x2 - x1) * self.roi_padding
-            ph = (y2 - y1) * self.roi_padding
-            x1 = max(0, int(x1 - pw));  y1 = max(0, int(y1 - ph))
-            x2 = min(W, int(x2 + pw));  y2 = min(H, int(y2 + ph))
-
-            if x2 <= x1 or y2 <= y1:
-                x1, y1, x2, y2 = 0, 0, W, H
-
-            crop = images[batch_idx:batch_idx+1, :, y1:y2, x1:x2]
-            crops[i] = F.interpolate(
-                crop, size=(roi_size, roi_size),
-                mode="bilinear", align_corners=False,
-            )[0]
-
-        return crops   # (N, 3, roi_size, roi_size)
-
-    def forward(self, images, gt_boxes=None):
-        """
-        Forward pass completo.
-
-        Returns dict con:
-          'predictions'  : (B, 8400, 6)
-          'feature_map'  : (B, 128, 40, 40)
-          'raw_detect'   : dict interno YOLO
-          'rois'         : (N, 5)
-          'logits'       : (N, 1)  — logit MLP binario
-          'roi_labels_gt': (N,)    — 1=vuoto, 0=pieno
-          'n_rois'       : int
+        Args:
+            images:    (B, 3, 640, 640)
+            gt_boxes:  lista di B tensor (Ni, 4) formato YOLO norm (xc,yc,w,h)
+            gt_labels: non usato (una sola classe), mantenuto per compatibilita'
         """
         B      = images.shape[0]
         device = images.device
 
-        # ── YOLO26 ────────────────────────────────────────────────────────────
-        predictions, feature_map, raw_detect = self.detector(images)
-
-        # ── Filtra predizioni ─────────────────────────────────────────────────
+        predictions, feature_map, *_ = self.detector(images)
         filtered_preds = self.detector.filter_predictions(predictions)
-        rois           = self.detector.predictions_to_roi_format(filtered_preds, B)
 
-       # Cap sul numero di ROI — prende le MAX_ROIS_PER_BATCH più confidenti
-        if rois.shape[0] > MAX_ROIS_PER_BATCH:
-            rois = rois[:MAX_ROIS_PER_BATCH]
-    
+        if gt_boxes is not None and self.training:
+            gt_xyxy_list = [
+                self._yolo_to_xyxy_pixel(gt.to(device), images.shape[-1])
+                for gt in gt_boxes
+            ]
+            roi_labels_list, filtered_preds = self._assign_roi_labels(
+                filtered_preds, gt_xyxy_list, device
+            )
+        else:
+            gt_xyxy_list = [torch.zeros(0, 4, device=device)] * B
+            roi_labels_list = [
+                torch.ones(len(fp), dtype=torch.long, device=device)
+                for fp in filtered_preds
+            ]
+
+        if self.training and self.n_neg_synthetic > 0 and gt_boxes is not None:
+            filtered_preds, roi_labels_list = self._add_synthetic_negatives(
+                filtered_preds, roi_labels_list,
+                gt_xyxy_list, img_size=images.shape[-1], device=device
+            )
+
+        rois = self.detector.predictions_to_roi_format(filtered_preds, B)
+        roi_labels_gt = torch.cat(roi_labels_list) if roi_labels_list else \
+                        torch.zeros(0, dtype=torch.long, device=device)
+
         if rois.shape[0] == 0:
             return {
                 "predictions":   predictions,
                 "feature_map":   feature_map,
-                "raw_detect":    raw_detect,
                 "rois":          rois,
-                "logits":        torch.zeros(0, 1, device=device),
-                "roi_labels_gt": torch.zeros(0, dtype=torch.long, device=device),
+                "logits_pos":    torch.zeros(0, 1, device=device),
+                "roi_labels_gt": roi_labels_gt,
                 "n_rois":        0,
             }
 
-        # ── Label ROI dal IoU matching ────────────────────────────────────────
-        if gt_boxes is not None and self.training:
-                    roi_labels_gt = self._assign_roi_labels(
-                        filtered_preds, gt_boxes, img_size=images.shape[-1]
-                    ).to(device)
-                    # Applica il cap anche alle label
-                    roi_labels_gt = roi_labels_gt[:rois.shape[0]]
-        else:
-            roi_labels_gt = torch.ones(
-                rois.shape[0], dtype=torch.long, device=device
-            )
-            
-        # ── Crop reali dall'immagine originale ────────────────────────────────
-        with torch.no_grad():
-            roi_crops = self._crop_from_image(
-                images.detach(), rois.detach(), self.roi_size
-            )
-
-        # ── RoI Align sulla feature map (solo per il backward) ────────────────
         roi_features = roi_align(
             input          = feature_map,
             boxes          = rois,
@@ -204,24 +138,127 @@ class JointPipeline(nn.Module):
             sampling_ratio = 2,
             aligned        = True,
         )
-        roi_proj = self.feature_proj(roi_features)  # (N, 3, 7, 7)
 
-        # ── SigLIPv2 + MLP ────────────────────────────────────────────────────
-        logits = self.siglip(roi_crops)   # (N, 1)
+        roi_rgb   = self.feature_proj(roi_features)
+        roi_crops = F.interpolate(
+            roi_rgb, size=(self.roi_size, self.roi_size),
+            mode='bilinear', align_corners=False,
+        )
 
-        # Collegamento differenziabile YOLO → grafo SigLIP
-        if self.training and roi_proj.requires_grad:
-            logits = logits + roi_proj.mean() * 0.0
+        logits_pos = self.siglip(roi_crops)   # (N, 1) — MLP binario
 
         return {
             "predictions":   predictions,
             "feature_map":   feature_map,
-            "raw_detect":    raw_detect,
             "rois":          rois,
-            "logits":        logits,
-            "roi_labels_gt": roi_labels_gt,
+            "logits_pos":    logits_pos,
+            "roi_labels_gt": roi_labels_gt.to(device),
             "n_rois":        rois.shape[0],
         }
 
     def remove_hooks(self):
         self.detector.remove_hooks()
+
+    def _assign_roi_labels(self, filtered_preds, gt_xyxy_list, device):
+        roi_labels_list  = []
+        clean_preds_list = []
+
+        for i, preds in enumerate(filtered_preds):
+            preds = preds.to(device)
+            gt    = gt_xyxy_list[i]
+
+            if len(preds) == 0:
+                roi_labels_list.append(torch.zeros(0, dtype=torch.long, device=device))
+                clean_preds_list.append(preds)
+                continue
+
+            if len(gt) == 0:
+                roi_labels_list.append(torch.zeros(len(preds), dtype=torch.long, device=device))
+                clean_preds_list.append(preds)
+                continue
+
+            iou_mat   = box_iou(preds[:, :4], gt)
+            max_iou,_ = iou_mat.max(dim=1)
+
+            pos_mask  = max_iou >= self.iou_pos_thr
+            neg_mask  = max_iou <  self.iou_neg_thr
+            keep_mask = pos_mask | neg_mask
+
+            labels = torch.where(
+                pos_mask,
+                torch.ones_like(max_iou,  dtype=torch.long),
+                torch.zeros_like(max_iou, dtype=torch.long),
+            )
+
+            roi_labels_list.append(labels[keep_mask])
+            clean_preds_list.append(preds[keep_mask])
+
+        return roi_labels_list, clean_preds_list
+
+    def _add_synthetic_negatives(self, filtered_preds, roi_labels_list,
+                                  gt_xyxy_list, img_size, device):
+        new_preds  = []
+        new_labels = []
+
+        for i, preds in enumerate(filtered_preds):
+            preds  = preds.to(device)
+            labels = roi_labels_list[i].to(device)
+            gt     = gt_xyxy_list[i]
+
+            n_pos    = int(labels.sum().item())
+            n_target = max(n_pos, self.n_neg_synthetic)
+
+            synthetic = self._sample_negative_rois(gt, img_size, n_target, device)
+
+            if synthetic.shape[0] > 0:
+                syn_labels = torch.zeros(synthetic.shape[0], dtype=torch.long, device=device)
+                preds  = torch.cat([preds,  synthetic],  dim=0)
+                labels = torch.cat([labels, syn_labels], dim=0)
+
+            new_preds.append(preds)
+            new_labels.append(labels)
+
+        return new_preds, new_labels
+
+    def _sample_negative_rois(self, gt_xyxy, img_size, n_target, device,
+                               max_attempts=200, min_size_frac=0.05, max_size_frac=0.50):
+        if n_target <= 0:
+            return torch.zeros(0, 6, device=device)
+
+        min_sz = max(1, int(min_size_frac * img_size))
+        max_sz = max(min_sz + 1, int(max_size_frac * img_size))
+
+        negatives = []
+        attempts  = 0
+
+        while len(negatives) < n_target and attempts < max_attempts:
+            attempts += 1
+
+            w  = torch.randint(min_sz, max_sz, (1,)).item()
+            h  = torch.randint(min_sz, max_sz, (1,)).item()
+            x1 = torch.randint(0, max(1, img_size - w), (1,)).item()
+            y1 = torch.randint(0, max(1, img_size - h), (1,)).item()
+
+            candidate = torch.tensor([[x1, y1, x1+w, y1+h]], dtype=torch.float32, device=device)
+
+            if len(gt_xyxy) > 0:
+                if box_iou(candidate, gt_xyxy).max().item() > self.neg_iou_max:
+                    continue
+
+            negatives.append(
+                torch.tensor([x1, y1, x1+w, y1+h, 0.0, 0.0], dtype=torch.float32, device=device)
+            )
+
+        return torch.stack(negatives) if negatives else torch.zeros(0, 6, device=device)
+
+    @staticmethod
+    def _yolo_to_xyxy_pixel(boxes, img_size):
+        if len(boxes) == 0:
+            return boxes
+        s  = float(img_size)
+        xc, yc, w, h = boxes[:,0]*s, boxes[:,1]*s, boxes[:,2]*s, boxes[:,3]*s
+        x1 = (xc - w/2).clamp(0, s)
+        y1 = (yc - h/2).clamp(0, s)
+        x2 = (xc + w/2).clamp(0, s)
+        y2 = (yc + h/2).clamp(0, s)
+        return torch.stack([x1, y1, x2, y2], dim=1)

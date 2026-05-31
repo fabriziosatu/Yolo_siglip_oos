@@ -1,0 +1,8 @@
+15:30Claude ha risposto: Ora il quadro è completo e molto chiaro.Ora il quadro è completo e molto chiaro. Mettendo insieme tutti e tre i risultati:
+ConfigurazionePrecisionRecallF1FP-RateYOLO conf=0.0 (no filtro)1.6%99.5%3.2%100.0%YOLO conf=0.25 (standard)93.9%85.9%89.7%0.10%Pipeline conf=0.25 + SigLIP=0.593.9%85.4%89.5%89.9%*Pipeline conf=0.0 + SigLIP=0.58.7%95.7%15.9%16.7%Pipeline conf=0.0 + SigLIP=0.911.8%93.0%20.9%11.5%
+*il TN della pipeline con conf=0.25 era calcolato in modo non confrontabile
+
+Cosa emerge chiaramente
+Riga 1 → Riga 2 dimostra il contributo della soglia di confidenza YOLO: passare da conf=0.0 a conf=0.25 riduce i FP da 164.974 a 154, mantenendo recall decente. Questo è il filtro principale.
+Riga 1 → Riga 4 dimostra il contributo di SigLIP quando YOLO non filtra nulla: con conf=0.0, SigLIP riduce i FP da 164.974 a 27.627 — una riduzione del 83.2% — e la FP-Rate scende da 100% a 16.7%. Questo è il risultato più forte che hai per giustificare SigLIP nella tesi.
+Riga 4 → Riga 5 mostra la curva P-R di SigLIP: alzando la soglia da 0.5 a 0.9 la FP-Rate scende ulteriormente da 16.7% a 11.5%, con una piccola perdita di recall (95.7% → 93.0%).

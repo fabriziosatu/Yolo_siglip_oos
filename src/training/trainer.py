@@ -4,12 +4,10 @@ src/training/trainer.py
 Training loop — Fase 2: joint loss differenziabile con pesi fissi.
 
 L_joint = alpha * L_YOLO(CIoU+BCE) + beta * L_SigLIP(BCE)
-con alpha=0.89, beta=0.11 — un solo backward aggiorna YOLO e SigLIP insieme.
+con alpha=0.49, beta=0.51 — un solo backward aggiorna YOLO e SigLIP insieme.
 
-Rispetto alla versione precedente:
-  - SigLIPSigmoidLoss → SigLIPBCELoss (MLP al posto del text encoder)
-  - output["logits_pos/neg"] → output["logits"]
-  - Tutto il resto invariato
+Negativi sintetici generati on-the-fly dalla JointPipeline
+tramite _sample_negative_rois() — nessun dataset esterno necessario.
 """
 
 import torch
@@ -40,6 +38,8 @@ class Trainer:
         print(f"{'='*60}")
 
         # ── Pipeline ──────────────────────────────────────────────────────────
+        # Nota: mlp_hidden e mlp_dropout sono parametri di SigLIPModule,
+        # non di JointPipeline — vengono letti internamente dalla pipeline
         self.pipeline = JointPipeline(
             yolo_weights      = self.cfg.detector.model_name,
             siglip_model_name = self.cfg.siglip.model_name,
@@ -47,15 +47,13 @@ class Trainer:
             lora_r_visual     = self.cfg.siglip.lora_r_visual,
             lora_alpha_visual = self.cfg.siglip.lora_alpha_visual,
             lora_dropout      = self.cfg.siglip.lora_dropout,
-            mlp_hidden        = self.cfg.siglip.mlp_hidden,
-            mlp_dropout       = self.cfg.siglip.mlp_dropout,
             roi_size          = self.cfg.data.roi_size,
         ).to(self.device)
 
         # ── Loss functions ────────────────────────────────────────────────────
         self.siglip_loss_fn = SigLIPBCELoss()
         self.yolo_loss_fn   = YOLOLossWrapper()
-        self.joint_loss = JointLoss(
+        self.joint_loss     = JointLoss(
             alpha = self.cfg.training.alpha,
             beta  = self.cfg.training.beta,
         )
@@ -87,11 +85,12 @@ class Trainer:
             eta_min = self.cfg.training.lr_siglip * 0.01,
         )
 
-        # ── DataLoader ────────────────────────────────────────────────────────
+        # ── DataLoader — phase2 per training con negativi sintetici ──────────
         print("\nCarico i dataset...")
         self.train_loader, self.val_loader, self.test_loader = build_dataloaders(
             img_size   = self.cfg.data.img_size,
             batch_size = self.cfg.data.batch_size,
+            mode       = "phase2",
             data_dir   = str(self.cfg.data.data_dir),
         )
 
@@ -109,6 +108,11 @@ class Trainer:
 
     def _train_epoch(self, epoch: int) -> dict:
         self.pipeline.train()
+
+        # Ricampiona i negativi all'inizio di ogni epoca (1:1 con i positivi)
+        if hasattr(self.train_loader.dataset, 'resample_negatives'):
+            self.train_loader.dataset.resample_negatives()
+
         total_loss = total_yolo = total_sig = 0.0
         n_batches  = 0
 
@@ -126,7 +130,8 @@ class Trainer:
             self.optimizer_yolo.zero_grad()
             self.optimizer_siglip.zero_grad()
 
-            output = self.pipeline(images, gt_boxes=boxes)
+            # La pipeline genera i negativi sintetici internamente
+            output = self.pipeline(images, gt_boxes=boxes, gt_labels=labels)
 
             # L_YOLO — CIoU+BCE custom differenziabile
             loss_yolo = self.yolo_loss_fn.compute(
@@ -137,11 +142,11 @@ class Trainer:
                 predictions = output["predictions"],
             )
 
-            # L_SigLIP — BCE sul logit MLP
+            # L_SigLIP — BCE sul logit MLP (output["logits_pos"])
             if output["n_rois"] > 0:
                 loss_siglip = self.siglip_loss_fn(
-                    logits     = output["logits"],
-                    roi_labels = output["roi_labels_gt"],
+                    output["logits_pos"],
+                    output["roi_labels_gt"],
                 )
             else:
                 loss_siglip = torch.tensor(
@@ -169,7 +174,7 @@ class Trainer:
             total_sig  += loss_siglip.item()
             n_batches  += 1
 
-            n_pos = (output["roi_labels_gt"] == 1).sum().item() \
+            n_pos = int((output["roi_labels_gt"] == 1).sum().item()) \
                     if output["n_rois"] > 0 else 0
             n_neg = output["n_rois"] - n_pos
             pbar.set_postfix({
@@ -207,8 +212,8 @@ class Trainer:
             )
             if output["n_rois"] > 0:
                 loss_siglip = self.siglip_loss_fn(
-                    logits     = output["logits"],
-                    roi_labels = output["roi_labels_gt"],
+                    output["logits_pos"],
+                    output["roi_labels_gt"],
                 )
             else:
                 loss_siglip = torch.tensor(0.0, device=self.device)
@@ -245,6 +250,7 @@ class Trainer:
         a, b = self.joint_loss.alpha, self.joint_loss.beta
         print(f"\nInizio training per {self.cfg.training.num_epochs} epoche")
         print(f"  L_joint = {a}*L_YOLO(CIoU+BCE) + {b}*L_SigLIP(BCE)")
+        print(f"  Negativi sintetici: generati on-the-fly dalla JointPipeline")
         print(f"  Un solo backward — YOLO e SigLIP aggiornati insieme\n")
         start_time = time.time()
 

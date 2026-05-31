@@ -3,6 +3,12 @@ scripts/visualize_predictions.py
 ==================================
 Visualizza le predizioni della pipeline joint su immagini del test set.
 
+Legenda:
+  Giallo tratteggiato = GT box reale
+  Blu                 = predizione YOLO
+  Verde               = ROI classificata VUOTA da SigLIP (MLP)
+  Rosso               = ROI classificata PIENA da SigLIP (MLP)
+
 Esegui con:
   python scripts/visualize_predictions.py
   python scripts/visualize_predictions.py --n_images 8
@@ -27,11 +33,11 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--phase1_weights", type=str, default=str(PHASE1_WEIGHTS))
     parser.add_argument("--phase2_weights", type=str, default=str(PHASE2_WEIGHTS))
-    parser.add_argument("--data_dir",   type=str,   default="data/processed")
-    parser.add_argument("--n_images",   type=int,   default=8)
-    parser.add_argument("--output_dir", type=str,   default="output/visualizations")
-    parser.add_argument("--conf",       type=float, default=0.1)
-    parser.add_argument("--seed",       type=int,   default=42)
+    parser.add_argument("--data_dir",      type=str,   default="data/processed_clean")
+    parser.add_argument("--n_images",      type=int,   default=8)
+    parser.add_argument("--output_dir",    type=str,   default="output/visualizations")
+    parser.add_argument("--conf",          type=float, default=0.15)
+    parser.add_argument("--seed",          type=int,   default=42)
     parser.add_argument("--siglip_thresh", type=float, default=0.5)
     return parser.parse_args()
 
@@ -51,7 +57,7 @@ def draw_box(draw, box, color, label="", width=2, dashed=False):
     if label:
         try:
             font = ImageFont.truetype("arial.ttf", 12)
-        except:
+        except Exception:
             font = ImageFont.load_default()
         bbox_text = draw.textbbox((x1, y1-16), label, font=font)
         draw.rectangle(bbox_text, fill=color)
@@ -60,13 +66,6 @@ def draw_box(draw, box, color, label="", width=2, dashed=False):
 
 def visualize_single(image_tensor, gt_boxes, output, conf_threshold,
                      siglip_thresh=0.5, img_path=""):
-    """
-    Legenda:
-      Giallo tratteggiato = GT box reale
-      Blu                 = predizione YOLO
-      Verde               = ROI classificata VUOTA da SigLIP (MLP)
-      Rosso               = ROI classificata PIENA da SigLIP (MLP)
-    """
     img_np = (image_tensor.cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
     img    = Image.fromarray(img_np).convert("RGB")
     draw   = ImageDraw.Draw(img)
@@ -77,7 +76,7 @@ def visualize_single(image_tensor, gt_boxes, output, conf_threshold,
         xc, yc, w, h = gt[0]*W, gt[1]*H, gt[2]*W, gt[3]*H
         x1, y1 = xc - w/2, yc - h/2
         x2, y2 = xc + w/2, yc + h/2
-        draw_box(draw, [x1,y1,x2,y2], color=(255,255,0),
+        draw_box(draw, [x1, y1, x2, y2], color=(255, 255, 0),
                  label="GT", dashed=True, width=2)
 
     # Predizioni YOLO (blu)
@@ -85,34 +84,34 @@ def visualize_single(image_tensor, gt_boxes, output, conf_threshold,
     preds = raw_preds[0] if raw_preds.dim() == 3 else raw_preds
     for pred in preds:
         if pred[4].item() >= conf_threshold:
-            x1,y1,x2,y2 = pred[:4].tolist()
+            x1, y1, x2, y2 = pred[:4].tolist()
             conf = pred[4].item()
-            draw_box(draw, [x1,y1,x2,y2],
-                     color=(100,100,255),
+            draw_box(draw, [x1, y1, x2, y2],
+                     color=(100, 100, 255),
                      label=f"YOLO {conf:.2f}",
                      width=1)
 
-    # ROI classificate da SigLIP MLP
+    # ROI classificate da SigLIP MLP — usa logits_pos
     if output["n_rois"] > 0:
         rois   = output["rois"]
-        logits = output["logits"]   # (N, 1) — logit MLP
+        logits = output["logits_pos"]   # (N, 1) — FIX: era output["logits"]
 
         for j in range(len(rois)):
-            if rois[j, 0].long() != 0:  # solo img 0 del batch
+            if rois[j, 0].long() != 0:   # solo img 0 del batch
                 continue
-            x1,y1,x2,y2 = rois[j, 1:].tolist()
+            x1, y1, x2, y2 = rois[j, 1:].tolist()
             score    = torch.sigmoid(logits[j]).item()
             is_empty = score >= siglip_thresh
             color    = (0, 220, 0) if is_empty else (220, 0, 0)
             label    = f"VUOTO {score:.2f}" if is_empty else f"PIENO {score:.2f}"
-            draw_box(draw, [x1,y1,x2,y2], color=color, label=label, width=3)
+            draw_box(draw, [x1, y1, x2, y2], color=color, label=label, width=3)
 
     # Legenda
     legend_items = [
-        ((255,255,0),   "GT box reale"),
-        ((100,100,255), "Predizione YOLO"),
-        ((0,220,0),     f"SigLIP: VUOTO (>={siglip_thresh:.1f})"),
-        ((220,0,0),     f"SigLIP: PIENO (<{siglip_thresh:.1f})"),
+        ((255, 255, 0),   "GT box reale"),
+        ((100, 100, 255), "Predizione YOLO"),
+        ((0, 220, 0),     f"SigLIP: VUOTO (>={siglip_thresh:.2f})"),
+        ((220, 0, 0),     f"SigLIP: PIENO (<{siglip_thresh:.2f})"),
     ]
     y_leg = 5
     for color, text in legend_items:
@@ -146,7 +145,9 @@ def main():
     print(f"  Output          : {out_dir}")
     print("-" * 60)
 
-    # Carica pipeline
+    # ── Carica pipeline ───────────────────────────────────────────────────────
+    # FIX: rimossi mlp_hidden e mlp_dropout — parametri di SigLIPModule,
+    # non di JointPipeline
     pipeline = JointPipeline(
         yolo_weights      = args.phase1_weights,
         siglip_model_name = CFG.siglip.model_name,
@@ -154,22 +155,21 @@ def main():
         lora_r_visual     = CFG.siglip.lora_r_visual,
         lora_alpha_visual = CFG.siglip.lora_alpha_visual,
         lora_dropout      = CFG.siglip.lora_dropout,
-        mlp_hidden        = CFG.siglip.mlp_hidden,
-        mlp_dropout       = CFG.siglip.mlp_dropout,
         roi_size          = CFG.data.roi_size,
     ).to(device)
 
-    ck = torch.load(args.phase2_weights, map_location=device, weights_only=False)
+    ck    = torch.load(args.phase2_weights, map_location=device, weights_only=False)
     state = {k: v for k, v in ck["pipeline_state_dict"].items()
              if "model.23" not in k}
     pipeline.load_state_dict(state, strict=False)
     pipeline.eval()
     print(f"  Pipeline caricata — epoca {ck['epoch']+1}")
 
-    # Test set
+    # ── Test set — phase1 per avere solo positivi con GT ─────────────────────
     _, _, test_loader = build_dataloaders(
         img_size   = CFG.data.img_size,
         batch_size = 1,
+        mode       = "phase1",
         data_dir   = args.data_dir,
     )
 
@@ -199,8 +199,8 @@ def main():
 
             n_rois = output["n_rois"]
             if n_rois > 0:
-                scores  = torch.sigmoid(output["logits"]).squeeze(1)
-                n_empty = (scores >= args.siglip_thresh).sum().item()
+                scores  = torch.sigmoid(output["logits_pos"]).squeeze(1)
+                n_empty = int((scores >= args.siglip_thresh).sum().item())
                 n_full  = n_rois - n_empty
             else:
                 n_empty = n_full = 0

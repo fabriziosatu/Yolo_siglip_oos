@@ -33,7 +33,7 @@ nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
 mkdir -p "$HPC_ROOT/logs"
 
 # Verifica che i pesi Fase 1 esistano prima di procedere
-PHASE1_WEIGHTS="$HPC_ROOT/weights/cluster_training/phase1_yolo/weights/best.pt"
+PHASE1_WEIGHTS="$HPC_ROOT/weights/cluster_training/phase1_yolo_clean/weights/best.pt"
 if [ ! -f "$PHASE1_WEIGHTS" ]; then
     echo "ERRORE: pesi Fase 1 non trovati in $PHASE1_WEIGHTS"
     echo "Esegui prima phase1_yolo.sh"
@@ -45,7 +45,7 @@ echo "Pesi Fase 1 trovati: $PHASE1_WEIGHTS"
 python -u src/training/train_phase2_joint.py \
     --yolo_weights "$PHASE1_WEIGHTS" \
     --epochs 50 \
-    --batch  8
+    --batch  16
 
 echo "=================================================="
 echo "Fase 2 Completata: $(date)"

@@ -37,7 +37,8 @@ python -u src/training/train_phase1_yolo.py \
     --epochs 80 \
     --batch  16  \
     --imgsz  640 \
-    --device 0
+    --device 0 \
+    --name   phase1_yolo_clean
 
 echo "=================================================="
 echo "Fase 1 Completata: $(date)"

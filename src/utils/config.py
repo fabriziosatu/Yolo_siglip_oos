@@ -15,8 +15,8 @@ from pathlib import Path
 
 @dataclass
 class DataConfig:
-    data_dir:     Path = Path("data/processed")
-    dataset_yaml: Path = Path("data/processed/dataset.yaml")
+    data_dir:     Path = Path("data/processed_clean")
+    dataset_yaml: Path = Path("data/processed_clean/dataset.yaml")
     img_size:     int  = 640
     roi_size:     int  = 224
     num_workers:  int  = 2
@@ -25,7 +25,7 @@ class DataConfig:
 
 @dataclass
 class DetectorConfig:
-    model_name:     str   = "weights/cluster_training/phase1_yolo/weights/best.pt"
+    model_name:     str   = "weights/cluster_training/phase1_yolo_clean/weights/best.pt"
     conf_threshold: float = 0.25
     iou_threshold:  float = 0.45
 
@@ -35,27 +35,27 @@ class SigLIPConfig:
     model_name:        str   = "google/siglip2-base-patch16-224"
     lora_r_visual:     int   = 4
     lora_alpha_visual: int   = 8
-    lora_dropout:      float = 0.15
+    lora_dropout:      float = 0.30
     # MLP classificatore binario — sostituisce il text encoder
     mlp_hidden:        list  = field(default_factory=lambda: [256, 64])
-    mlp_dropout:       float = 0.30
+    mlp_dropout:       float = 0.50
 
 
 @dataclass
 class TrainingConfig:
     num_epochs:  int   = 50
     lr_detector: float = 5e-6
-    lr_siglip:   float = 1e-5
+    lr_siglip:   float = 5e-6
 
     weight_decay_yolo:   float = 1e-4
-    weight_decay_siglip: float = 1e-4
+    weight_decay_siglip: float = 1e-2
 
     use_amp: bool = False
 
     # Pesi joint loss — fissi, calcolati con analyze_losses_custom.py
     # alpha = L_SigLIP / (L_YOLO + L_SigLIP) con vincolo alpha+beta=1
-    alpha: float = 0.89
-    beta:  float = 0.11
+    alpha: float = 0.49
+    beta:  float = 0.51
 
     save_dir:            Path = Path("weights/cluster_training/phase2_joint")
     save_every:          int  = 5
@@ -64,7 +64,7 @@ class TrainingConfig:
 
 
 # Percorsi pesi — usati da evaluate.py e visualize_predictions.py
-PHASE1_WEIGHTS = Path("weights/cluster_training/phase1_yolo/weights/best.pt")
+PHASE1_WEIGHTS = Path("weights/cluster_training/phase1_yolo_clean/weights/best.pt")
 PHASE2_WEIGHTS = Path("weights/cluster_training/phase2_joint/best_model.pt")
 
 
