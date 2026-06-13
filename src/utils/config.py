@@ -15,8 +15,8 @@ from pathlib import Path
 
 @dataclass
 class DataConfig:
-    data_dir:     Path = Path("data/processed_clean")
-    dataset_yaml: Path = Path("data/processed_clean/dataset.yaml")
+    data_dir:     Path = Path("data/dataset_finale")
+    dataset_yaml: Path = Path("data/dataset_finale/data.yaml")
     img_size:     int  = 640
     roi_size:     int  = 224
     num_workers:  int  = 2

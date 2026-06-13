@@ -148,8 +148,15 @@ class ShelfDataset(Dataset):
         self.web_img_dir = Path(web_img_dir)
 
         data_dir = Path(data_dir)
-        img_dir  = data_dir / "images" / split
-        lbl_dir  = data_dir / "labels" / split
+        # Supporta due strutture:
+        #   A) data_dir/images/<split>/  (struttura standard)
+        #   B) data_dir/<split>/images/  (struttura cluster HPC)
+        if (data_dir / "images" / split).exists():
+            img_dir = data_dir / "images" / split
+            lbl_dir = data_dir / "labels" / split
+        else:
+            img_dir = data_dir / split / "images"
+            lbl_dir = data_dir / split / "labels"
 
         # Carica positivi
         self.positives = []

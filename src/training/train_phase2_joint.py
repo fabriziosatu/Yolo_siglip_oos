@@ -11,11 +11,6 @@ Differenze rispetto al training standalone:
   - SigLIP viene fine-tunato con LoRA per adattarsi al dominio
   - ProgLoss bilancia le due loss durante il training
   - I gradienti di SigLIP risalgono via RoI Align fino al backbone YOLO
-
-Esegui con:
-  python scripts/train_phase2_joint.py
-  python scripts/train_phase2_joint.py --yolo_weights weights/phase1_yolo/weights/best.pt
-  python scripts/train_phase2_joint.py --epochs 10 --batch 4
 """
 
 import argparse
