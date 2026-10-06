@@ -1,9 +1,0 @@
-==================================================
-Job: oos_fase3_r8 (LoRA rank=8, alpha=16 — redo neg_ratio=1.0 con parametri anti-overfitting)
-Data: Sun Jul 26 05:00:43 PM CEST 2026
-Nodo: ainode01
-==================================================
-NVIDIA H100 80GB HBM3, 81559 MiB
-==================================================
-Job completato: Sun Jul 26 05:00:43 PM CEST 2026
-==================================================

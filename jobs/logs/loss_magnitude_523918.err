@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "/home/F.SATURNINO/Progetto_tesi_SigLIP/src/evaluation/analyze_yolo_loss_magnitude.py", line 351, in <module>
-    main(args)
-  File "/home/F.SATURNINO/Progetto_tesi_SigLIP/src/evaluation/analyze_yolo_loss_magnitude.py", line 313, in main
-    raise ValueError(
-ValueError: Hai passato 1 file in --results_csv ma 2 etichette in --labels: devono essere lo stesso numero, nello stesso ordine.

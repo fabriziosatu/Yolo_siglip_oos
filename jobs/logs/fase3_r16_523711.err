@@ -1,4 +1,0 @@
-[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
-Loading weights:   0%|          | 0/1096 [00:00<?, ?it/s]Loading weights:  22%|██▏       | 238/1096 [00:00<00:00, 2325.77it/s]Loading weights:  43%|████▎     | 471/1096 [00:00<00:00, 2211.68it/s]Loading weights:  63%|██████▎   | 693/1096 [00:00<00:00, 1991.94it/s]Loading weights:  82%|████████▏ | 895/1096 [00:00<00:00, 1899.13it/s]Loading weights:  99%|█████████▉| 1087/1096 [00:00<00:00, 1852.64it/s]Loading weights: 100%|██████████| 1096/1096 [00:00<00:00, 1925.35it/s]
-[transformers] The channel dimension is ambiguous. Got image shape torch.Size([3, 78, 3]). Assuming channels are the first dimension. Use the [input_data_format](https://huggingface.co/docs/transformers/main/internal/image_processing_utils#transformers.image_transforms.rescale.input_data_format) parameter to assign the channel dimension.
-slurmstepd: error: *** JOB 523711 ON ainode02 CANCELLED AT 2026-07-23T21:24:54 ***

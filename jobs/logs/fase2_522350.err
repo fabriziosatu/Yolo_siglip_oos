@@ -1,9 +1,0 @@
-Loading weights:   0%|          | 0/1096 [00:00<?, ?it/s]Loading weights:   4%|▍         | 48/1096 [00:00<00:02, 470.93it/s]Loading weights:  19%|█▊        | 203/1096 [00:00<00:01, 640.10it/s]Loading weights:  42%|████▏     | 456/1096 [00:00<00:00, 1201.06it/s]Loading weights:  54%|█████▍    | 590/1096 [00:00<00:00, 1151.66it/s]Loading weights:  65%|██████▌   | 713/1096 [00:00<00:00, 979.02it/s] Loading weights:  75%|███████▍  | 818/1096 [00:00<00:00, 981.82it/s]Loading weights:  92%|█████████▏| 1007/1096 [00:00<00:00, 1216.21it/s]Loading weights: 100%|██████████| 1096/1096 [00:00<00:00, 1103.47it/s]
-Traceback (most recent call last):
-  File "/home/F.SATURNINO/Progetto_tesi_SigLIP/src/evaluation/fase2_siglip_frozen.py", line 431, in <module>
-    run_pipeline(args)
-  File "/home/F.SATURNINO/Progetto_tesi_SigLIP/src/evaluation/fase2_siglip_frozen.py", line 221, in run_pipeline
-    siglip = SigLIP2ZeroShotClassifier(device=args.device)
-  File "/home/F.SATURNINO/Progetto_tesi_SigLIP/src/evaluation/fase2_siglip_frozen.py", line 181, in __init__
-    self.text_embeds = self.text_embeds / self.text_embeds.norm(dim=-1, keepdim=True)
-AttributeError: 'BaseModelOutputWithPooling' object has no attribute 'norm'

@@ -1,3 +1,0 @@
-[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
-Loading weights:   0%|          | 0/1096 [00:00<?, ?it/s]Loading weights:  49%|████▉     | 538/1096 [00:00<00:00, 5379.57it/s]Loading weights:  98%|█████████▊| 1076/1096 [00:00<00:00, 4474.75it/s]Loading weights: 100%|██████████| 1096/1096 [00:00<00:00, 4575.16it/s]
-slurmstepd: error: *** JOB 527247 ON ainode01 CANCELLED AT 2026-08-01T13:30:10 ***

@@ -1,5 +1,6 @@
 # Dataset e Immagini (da NON caricare come da NDA)
 dataset_finale/
+data/
 
 # Pesi dei modelli e risultati
 weights/
@@ -25,3 +26,8 @@ tesi_Siglip.txt
 .idea/
 .DS_Store
 Thumbs.db
+
+#Altre cartelle da non considerare
+jobs/
+output/
+get-pip.py
