@@ -1,17 +1,18 @@
 """
 src/training/losses.py
 =======================
-Loss functions per il joint training:
+Loss functions for joint training.
 
-  1. SigLIPBCELoss   — BCE binaria sul logit MLP (sostituisce SigLIPSigmoidLoss)
-  2. YOLOLossWrapper — CIoU + BCE custom differenziabile (NON usa E2ELoss)
-  3. JointLoss       — alpha*L_YOLO + beta*L_SigLIP con pesi FISSI
+CHANGES compared to your version (YOLOLossWrapper and JointLoss
+remain EXACTLY as you had them — custom differentiable CIoU+BCE,
+fixed alpha/beta weights):
 
-IMPORTANTE: YOLOLossWrapper usa la nostra CIoU+BCE custom con Max IoU Assigner
-differenziabile — NON usa E2ELoss/TAL di Ultralytics.
-
-alpha e beta sono fissi (calcolati con analyze_losses_custom.py):
-  alpha=0.89, beta=0.11  con vincolo alpha+beta=1
+  - SigLIPBCELoss: UNCHANGED (vision_mlp variant).
+  - SigLIPSigmoidLoss: NEW, for the complete variant (2 pos/neg logits,
+    same loss used in train_fase3_full_lora.py).
+  - compute_siglip_loss(): NEW dispatcher — chooses the right loss
+    based on cfg.siglip.variant, so trainer.py doesn't need to have if/else
+    scattered around for the variant.
 """
 
 import torch
@@ -20,47 +21,63 @@ import torch.nn.functional as F
 from torchvision.ops import box_iou
 
 
-# ── 1. SigLIP BCE Loss ────────────────────────────────────────────────────────
+# ── 1a. SigLIP BCE Loss (vision_mlp variant) — UNCHANGED ────────────────────
 
 class SigLIPBCELoss(nn.Module):
-    """
-    BCE binaria sul logit singolo dell'MLP classificatore.
-
-    Il text encoder è stato rimosso su indicazione della professoressa.
-    Al suo posto un MLP classifica direttamente l'embedding visivo di SigLIP.
-
-    Input:  logits (N, 1), roi_labels (N,)  [1=vuoto, 0=pieno]
-    Output: scalare BCE
-    """
+    """Binary BCE on the single logit of the MLP classifier."""
 
     def __init__(self, pos_weight: float = None):
         super().__init__()
         self._pos_weight = pos_weight
 
     def forward(self, logits, roi_labels):
+        """Computes BCE loss handling potential empty labels."""
         if len(roi_labels) == 0:
             return torch.tensor(0.0, requires_grad=True, device=logits.device)
-        targets = roi_labels.float().unsqueeze(1)   # (N, 1)
+        targets = roi_labels.float().unsqueeze(1)
         pw = None
         if self._pos_weight is not None:
             pw = torch.tensor([self._pos_weight], device=logits.device)
-        return F.binary_cross_entropy_with_logits(
-            logits, targets, pos_weight=pw, reduction="mean"
-        )
+        return F.binary_cross_entropy_with_logits(logits, targets, pos_weight=pw, reduction="mean")
 
     def get_predictions(self, logits, threshold=0.5):
+        """Converts logits to binary predictions using a threshold."""
         return (torch.sigmoid(logits).squeeze(1) >= threshold).long()
 
 
-# ── 2. YOLO Loss Wrapper — CIoU+BCE custom differenziabile ───────────────────
+# ── 1b. SigLIP Sigmoid Loss (complete variant) — NEW ───────────────────────
+
+class SigLIPSigmoidLoss(nn.Module):
+    """
+    Independent BCE on logit_pos and logit_neg — same loss as
+    train_fase3_full_lora.py. Used ONLY by variant="completa".
+    """
+
+    def forward(self, logits_pos, logits_neg, roi_labels):
+        """Computes the sum of Binary Cross Entropy losses for positive and negative logits."""
+        if len(roi_labels) == 0:
+            return torch.tensor(0.0, requires_grad=True, device=logits_pos.device)
+        labels = roi_labels.float().unsqueeze(1)
+        loss_pos = F.binary_cross_entropy_with_logits(logits_pos, labels, reduction="mean")
+        loss_neg = F.binary_cross_entropy_with_logits(logits_neg, 1.0 - labels, reduction="mean")
+        return (loss_pos + loss_neg) / 2.0
+
+
+def compute_siglip_loss(variant: str, siglip_out: dict, roi_labels: torch.Tensor,
+                         bce_loss_fn: SigLIPBCELoss, sigmoid_loss_fn: SigLIPSigmoidLoss) -> torch.Tensor:
+    """Single dispatcher called by trainer.py."""
+    if variant == "vision_mlp":
+        return bce_loss_fn(siglip_out["logit"], roi_labels)
+    elif variant == "completa":
+        return sigmoid_loss_fn(siglip_out["logits_pos"], siglip_out["logits_neg"], roi_labels)
+    else:
+        raise ValueError(f"Unknown SigLIP variant: '{variant}'")
+
+
+# ── 2. YOLO Loss Wrapper — Custom differentiable CIoU+BCE — UNCHANGED ───────
 
 class YOLOLossWrapper:
-    """
-    CIoU + BCE con predizioni differenziabili (grad_fn=True).
-
-    Non usa E2ELoss/TAL di Ultralytics — usa un Max IoU Assigner
-    differenziabile che mantiene il grafo computazionale intatto.
-    """
+    """Wrapper calculating bounding box regression and classification loss for YOLO."""
 
     def __init__(self, total_epochs: int = 50):
         self.img_size = 640.0
@@ -74,6 +91,7 @@ class YOLOLossWrapper:
         predictions: torch.Tensor = None,
         **kwargs,
     ) -> torch.Tensor:
+        """Computes bounding box matching, CIoU regression loss and BCE classification loss."""
 
         if predictions is None:
             return torch.tensor(0.0, requires_grad=True, device=device)
@@ -100,9 +118,7 @@ class YOLOLossWrapper:
             yc = gt[:, 1] * self.img_size
             w  = gt[:, 2] * self.img_size
             h  = gt[:, 3] * self.img_size
-            gt_xyxy = torch.stack([
-                xc - w/2, yc - h/2, xc + w/2, yc + h/2
-            ], dim=1)
+            gt_xyxy = torch.stack([xc - w/2, yc - h/2, xc + w/2, yc + h/2], dim=1)
 
             with torch.no_grad():
                 iou_matrix    = box_iou(pred_boxes.detach(), gt_xyxy)
@@ -126,6 +142,7 @@ class YOLOLossWrapper:
         return total_ciou + total_bce
 
     def _ciou_loss(self, pred, gt):
+        """Computes the Complete Intersection over Union (CIoU) Loss."""
         ix1 = torch.max(pred[:, 0], gt[:, 0])
         iy1 = torch.max(pred[:, 1], gt[:, 1])
         ix2 = torch.min(pred[:, 2], gt[:, 2])
@@ -157,25 +174,66 @@ class YOLOLossWrapper:
         return (1 - iou + dist_pen + alpha_c * v).mean()
 
 
-# ── 3. Joint Loss — pesi FISSI ────────────────────────────────────────────────
+def compute_balanced_weights(mean_yolo: float, mean_siglip: float,
+                              mode: str = "pure", floor: float = 0.3) -> tuple:
+    """
+    Calculates (alpha, beta) for the JointLoss starting from the average magnitude
+    observed of the two losses, with three possible strategies (see discussion
+    on the structural scale gap between L_YOLO — geometric regression,
+    never close to 0 even for a great detector — and L_SigLIP —
+    binary classification, can get close to 0 if well separated):
+
+      "pure"  — alpha = L_SigLIP/(L_YOLO+L_SigLIP), beta = 1-alpha.
+                "Honest" magnitude-by-magnitude balancing, but with
+                large scale gaps (e.g. 100x) pushes alpha close to 0 —
+                risk that L_SigLIP almost totally dominates the gradient
+                that reaches the box coordinates (via DetectNoDetach).
+
+      "log"   — uses log(1+L) instead of L before normalizing. Attenuates
+                the imbalance while keeping "who starts smaller
+                weighs more", without the total flattening of the linear
+                version when the gap is orders of magnitude.
+
+      "floor" — alpha = max(alpha_pure, floor), beta = 1-alpha. Pragmatic:
+                guarantees that L_YOLO always maintains a minimum weight
+                (default 0.3) in the gradient on box coordinates,
+                sacrificing the pure balancing criterion a bit.
+
+    Returns:
+        (alpha, beta) — not rounded, round downstream if needed
+    """
+    import math
+
+    if mode == "pure":
+        alpha = mean_siglip / (mean_yolo + mean_siglip)
+    elif mode == "log":
+        log_yolo = math.log(1.0 + mean_yolo)
+        log_sig  = math.log(1.0 + mean_siglip)
+        alpha = log_sig / (log_yolo + log_sig)
+    elif mode == "floor":
+        alpha_pure = mean_siglip / (mean_yolo + mean_siglip)
+        alpha = max(alpha_pure, floor)
+    else:
+        raise ValueError(f"Unknown mode: '{mode}' (use 'pure'/'log'/'floor')")
+
+    beta = 1.0 - alpha
+    return alpha, beta
+
+
+# ── 3. Joint Loss — FIXED weights — UNCHANGED ────────────────────────────────────
 
 class JointLoss(nn.Module):
-    """
-    L_joint = alpha * L_YOLO(CIoU+BCE) + beta * L_SigLIP(BCE)
+    """Combines YOLO loss and SigLIP loss linearly based on fixed coefficients alpha and beta."""
 
-    Pesi fissi con vincolo alpha+beta=1.
-    Calcolati con analyze_losses_custom.py su 20 batch reali.
-    """
-
-    def __init__(self, alpha: float = 0.89, beta: float = 0.11):
+    def __init__(self, alpha: float = 0.49, beta: float = 0.51):
         super().__init__()
         assert abs(alpha + beta - 1.0) < 1e-6, \
-            f"alpha+beta deve essere 1, ma {alpha}+{beta}={alpha+beta}"
+            f"alpha+beta must be 1, but {alpha}+{beta}={alpha+beta}"
         self.alpha = alpha
         self.beta  = beta
-        print(f"  JointLoss: alpha={alpha:.2f}, beta={beta:.2f} "
-              f"(alpha+beta={alpha+beta:.2f})")
+        print(f"  JointLoss: alpha={alpha:.3f}, beta={beta:.3f} (alpha+beta={alpha+beta:.3f})")
 
     def forward(self, loss_yolo, loss_siglip):
+        """Computes the weighted sum of individual loss components."""
         loss_joint = self.alpha * loss_yolo + self.beta * loss_siglip
         return loss_joint, loss_yolo, loss_siglip

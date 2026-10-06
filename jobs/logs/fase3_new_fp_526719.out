@@ -1,0 +1,36 @@
+==================================================
+Job: oos_fase3_new_fp (analisi nuovi FP + dump crop per ispezione manuale)
+Data: Thu Jul 30 04:39:44 PM CEST 2026
+Nodo: ainode02
+==================================================
+NVIDIA H100 80GB HBM3, 81559 MiB
+[Dump] I crop dei nuovi FP verranno salvati in output/fase3_new_fp_analysis/crops
+[1/4] Carico YOLO aug/noaug...
+[2/4] Carico zero-shot 'Versione 3' (Context Diagnostico)...
+[ZeroShot] Carico google/siglip2-giant-opt-patch16-384 su cuda...
+[3/4] Carico modello fine-tunato completo (context)...
+[FineTuned] Carico backbone google/siglip2-giant-opt-patch16-384...
+[4/4] Immagini test: 1679  conf=0.25  iou_thr=0.0
+  [100/1679] aug:nuovi_fp=1  noaug:nuovi_fp=0
+  [200/1679] aug:nuovi_fp=3  noaug:nuovi_fp=1
+  [300/1679] aug:nuovi_fp=8  noaug:nuovi_fp=6
+  [400/1679] aug:nuovi_fp=18  noaug:nuovi_fp=7
+  [500/1679] aug:nuovi_fp=18  noaug:nuovi_fp=8
+  [600/1679] aug:nuovi_fp=20  noaug:nuovi_fp=8
+  [700/1679] aug:nuovi_fp=20  noaug:nuovi_fp=8
+  [800/1679] aug:nuovi_fp=25  noaug:nuovi_fp=12
+  [900/1679] aug:nuovi_fp=25  noaug:nuovi_fp=13
+  [1000/1679] aug:nuovi_fp=25  noaug:nuovi_fp=14
+  [1100/1679] aug:nuovi_fp=34  noaug:nuovi_fp=21
+  [1200/1679] aug:nuovi_fp=36  noaug:nuovi_fp=23
+  [1300/1679] aug:nuovi_fp=37  noaug:nuovi_fp=23
+  [1400/1679] aug:nuovi_fp=38  noaug:nuovi_fp=27
+  [1500/1679] aug:nuovi_fp=38  noaug:nuovi_fp=27
+  [1600/1679] aug:nuovi_fp=42  noaug:nuovi_fp=28
+  [1679/1679] aug:nuovi_fp=42  noaug:nuovi_fp=28
+
+[Output] output/fase3_new_fp_analysis/new_fp_by_distractor.json
+[Output] output/fase3_new_fp_analysis/new_fp_by_distractor.png
+==================================================
+Job completato: Thu Jul 30 04:43:20 PM CEST 2026
+==================================================

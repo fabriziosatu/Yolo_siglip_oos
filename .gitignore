@@ -1,22 +1,27 @@
-tesi_env/
+# Dataset e Immagini (da NON caricare come da NDA)
+dataset_finale/
+
+# Pesi dei modelli e risultati
 weights/
-logs/
+results/
 *.pt
-*.pkl
-.venv/
+*.safetensors
+
+# Ambienti virtuali
+venv/
+env/
+.env
+
+# Cache di Python e script non rilevanti
 __pycache__/
+*.py[cod]
+*$py.class
+get-pip.py
+progetto_siglip.txt
+tesi_Siglip.txt
+
+# File di sistema e configurazioni IDE
+.vscode/
+.idea/
 .DS_Store
-
-# Escludi l'intera cartella dei dati pesanti
-data/oos_ridotto/
-data/processed/
-data/processed_clean/
-data/processed_clean_cluster/
-data/raw/
-
-# Se vuoi essere sicuro di non caricare mai immagini o file zip estratti per errore
-*.jpg
-*.jpeg
-*.png
-*.zip
-*.tar.gz
+Thumbs.db

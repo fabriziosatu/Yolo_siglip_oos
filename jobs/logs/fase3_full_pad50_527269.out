@@ -1,0 +1,19 @@
+==================================================
+Job: oos_fase3_full_pad50 (Completo, rank=16, padding=0.50, neg_ratio 0.25 e 0.5)
+Data: Sat Aug  1 01:36:23 PM CEST 2026
+Nodo: ainode01
+==================================================
+NVIDIA H100 80GB HBM3, 81559 MiB
+[Setup] Device: cuda
+[Setup] Carico processor/modello: google/siglip2-giant-opt-patch16-384
+[Dati] Costruisco dataset di training...
+[Dataset] train: 32554 positivi, 7139 negativi (39693 campioni totali)
+[Dati] Costruisco dataset di validazione...
+[Dataset] val: 5783 positivi, 1237 negativi (7020 campioni totali)
+[Modello] Costruisco SigLIP2 completo (vision+text) + LoRA su entrambe le torri...
+[Modello] LoRA visual: rank=16, alpha=32 (rapporto=2.0)
+[Modello] LoRA text  : rank=8, alpha=16
+[Modello] Parametri allenabili: 4,927,490 / 1,876,812,912 (0.26%)
+
+[Training] Inizio — 50 epoche, batch=16, lr=2e-05
+    [epoch 1/50 train] batch 50/2481 (2.97 batch/s, ETA 13.6 min) loss_corrente=0.9399

@@ -1,0 +1,158 @@
+==================================================
+Job: oos_fase3_full_r16 (SigLIP completo, LoRA rank=16, alpha=32)
+Data: Sat Jul 25 10:51:23 AM CEST 2026
+Nodo: ainode01
+==================================================
+NVIDIA H100 80GB HBM3, 81559 MiB
+[Setup] Device: cuda
+[Setup] Carico processor/modello: google/siglip2-giant-opt-patch16-384
+[Dati] Costruisco dataset di training...
+[Dataset] train: 32554 positivi, 0 negativi (32554 campioni totali)
+[Dati] Costruisco dataset di validazione...
+[Dataset] val: 5783 positivi, 0 negativi (5783 campioni totali)
+[Modello] Costruisco SigLIP2 completo (vision+text) + LoRA su entrambe le torri...
+[Modello] LoRA visual: rank=16, alpha=32 (rapporto=2.0)
+[Modello] LoRA text  : rank=8, alpha=16
+[Modello] Parametri allenabili: 4,927,490 / 1,876,812,912 (0.26%)
+
+[Training] Inizio — 50 epoche, batch=16, lr=2e-05
+    [epoch 1/50 train] batch 50/2035 (3.41 batch/s, ETA 9.7 min) loss_corrente=1.0173
+    [epoch 1/50 train] batch 100/2035 (3.56 batch/s, ETA 9.1 min) loss_corrente=0.5654
+    [epoch 1/50 train] batch 150/2035 (3.62 batch/s, ETA 8.7 min) loss_corrente=0.3836
+    [epoch 1/50 train] batch 200/2035 (3.64 batch/s, ETA 8.4 min) loss_corrente=0.2894
+    [epoch 1/50 train] batch 250/2035 (3.65 batch/s, ETA 8.1 min) loss_corrente=0.2320
+    [epoch 1/50 train] batch 300/2035 (3.67 batch/s, ETA 7.9 min) loss_corrente=0.1936
+    [epoch 1/50 train] batch 350/2035 (3.67 batch/s, ETA 7.6 min) loss_corrente=0.1666
+    [epoch 1/50 train] batch 400/2035 (3.68 batch/s, ETA 7.4 min) loss_corrente=0.1459
+    [epoch 1/50 train] batch 450/2035 (3.69 batch/s, ETA 7.2 min) loss_corrente=0.1298
+    [epoch 1/50 train] batch 500/2035 (3.69 batch/s, ETA 6.9 min) loss_corrente=0.1169
+    [epoch 1/50 train] batch 550/2035 (3.69 batch/s, ETA 6.7 min) loss_corrente=0.1063
+    [epoch 1/50 train] batch 600/2035 (3.70 batch/s, ETA 6.5 min) loss_corrente=0.0974
+    [epoch 1/50 train] batch 650/2035 (3.70 batch/s, ETA 6.2 min) loss_corrente=0.0900
+    [epoch 1/50 train] batch 700/2035 (3.70 batch/s, ETA 6.0 min) loss_corrente=0.0835
+    [epoch 1/50 train] batch 750/2035 (3.70 batch/s, ETA 5.8 min) loss_corrente=0.0780
+    [epoch 1/50 train] batch 800/2035 (3.71 batch/s, ETA 5.6 min) loss_corrente=0.0732
+    [epoch 1/50 train] batch 850/2035 (3.71 batch/s, ETA 5.3 min) loss_corrente=0.0689
+    [epoch 1/50 train] batch 900/2035 (3.71 batch/s, ETA 5.1 min) loss_corrente=0.0651
+    [epoch 1/50 train] batch 950/2035 (3.71 batch/s, ETA 4.9 min) loss_corrente=0.0617
+    [epoch 1/50 train] batch 1000/2035 (3.71 batch/s, ETA 4.6 min) loss_corrente=0.0587
+    [epoch 1/50 train] batch 1050/2035 (3.71 batch/s, ETA 4.4 min) loss_corrente=0.0559
+    [epoch 1/50 train] batch 1100/2035 (3.71 batch/s, ETA 4.2 min) loss_corrente=0.0533
+    [epoch 1/50 train] batch 1150/2035 (3.72 batch/s, ETA 4.0 min) loss_corrente=0.0510
+    [epoch 1/50 train] batch 1200/2035 (3.72 batch/s, ETA 3.7 min) loss_corrente=0.0489
+    [epoch 1/50 train] batch 1250/2035 (3.72 batch/s, ETA 3.5 min) loss_corrente=0.0470
+    [epoch 1/50 train] batch 1300/2035 (3.72 batch/s, ETA 3.3 min) loss_corrente=0.0451
+    [epoch 1/50 train] batch 1350/2035 (3.72 batch/s, ETA 3.1 min) loss_corrente=0.0435
+    [epoch 1/50 train] batch 1400/2035 (3.72 batch/s, ETA 2.8 min) loss_corrente=0.0419
+    [epoch 1/50 train] batch 1450/2035 (3.72 batch/s, ETA 2.6 min) loss_corrente=0.0405
+    [epoch 1/50 train] batch 1500/2035 (3.72 batch/s, ETA 2.4 min) loss_corrente=0.0391
+    [epoch 1/50 train] batch 1550/2035 (3.72 batch/s, ETA 2.2 min) loss_corrente=0.0379
+    [epoch 1/50 train] batch 1600/2035 (3.72 batch/s, ETA 1.9 min) loss_corrente=0.0367
+    [epoch 1/50 train] batch 1650/2035 (3.72 batch/s, ETA 1.7 min) loss_corrente=0.0356
+    [epoch 1/50 train] batch 1700/2035 (3.72 batch/s, ETA 1.5 min) loss_corrente=0.0345
+    [epoch 1/50 train] batch 1750/2035 (3.72 batch/s, ETA 1.3 min) loss_corrente=0.0336
+    [epoch 1/50 train] batch 1800/2035 (3.72 batch/s, ETA 1.1 min) loss_corrente=0.0326
+    [epoch 1/50 train] batch 1850/2035 (3.72 batch/s, ETA 0.8 min) loss_corrente=0.0317
+    [epoch 1/50 train] batch 1900/2035 (3.72 batch/s, ETA 0.6 min) loss_corrente=0.0309
+    [epoch 1/50 train] batch 1950/2035 (3.72 batch/s, ETA 0.4 min) loss_corrente=0.0301
+    [epoch 1/50 train] batch 2000/2035 (3.72 batch/s, ETA 0.2 min) loss_corrente=0.0294
+    [epoch 1/50 train] batch 2035/2035 (3.72 batch/s, ETA 0.0 min) loss_corrente=0.0289
+    [epoch 1/50 val] batch 50/362 (8.01 batch/s, ETA 0.6 min) loss_corrente=0.0000
+    [epoch 1/50 val] batch 100/362 (8.43 batch/s, ETA 0.5 min) loss_corrente=0.0000
+    [epoch 1/50 val] batch 150/362 (8.59 batch/s, ETA 0.4 min) loss_corrente=0.0000
+    [epoch 1/50 val] batch 200/362 (8.67 batch/s, ETA 0.3 min) loss_corrente=0.0000
+    [epoch 1/50 val] batch 250/362 (8.71 batch/s, ETA 0.2 min) loss_corrente=0.0000
+    [epoch 1/50 val] batch 300/362 (8.74 batch/s, ETA 0.1 min) loss_corrente=0.0000
+    [epoch 1/50 val] batch 350/362 (8.76 batch/s, ETA 0.0 min) loss_corrente=0.0000
+    [epoch 1/50 val] batch 362/362 (8.78 batch/s, ETA 0.0 min) loss_corrente=0.0000
+Epoch   1/50 | train_loss=0.0289 train_acc=1.000 | val_loss=0.0000 val_acc=1.000
+    [epoch 2/50 train] batch 50/2035 (3.71 batch/s, ETA 8.9 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 100/2035 (3.72 batch/s, ETA 8.7 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 150/2035 (3.73 batch/s, ETA 8.4 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 200/2035 (3.73 batch/s, ETA 8.2 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 250/2035 (3.73 batch/s, ETA 8.0 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 300/2035 (3.73 batch/s, ETA 7.8 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 350/2035 (3.73 batch/s, ETA 7.5 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 400/2035 (3.73 batch/s, ETA 7.3 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 450/2035 (3.73 batch/s, ETA 7.1 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 500/2035 (3.73 batch/s, ETA 6.9 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 550/2035 (3.73 batch/s, ETA 6.6 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 600/2035 (3.73 batch/s, ETA 6.4 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 650/2035 (3.73 batch/s, ETA 6.2 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 700/2035 (3.73 batch/s, ETA 6.0 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 750/2035 (3.73 batch/s, ETA 5.7 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 800/2035 (3.73 batch/s, ETA 5.5 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 850/2035 (3.73 batch/s, ETA 5.3 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 900/2035 (3.73 batch/s, ETA 5.1 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 950/2035 (3.73 batch/s, ETA 4.8 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1000/2035 (3.73 batch/s, ETA 4.6 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1050/2035 (3.73 batch/s, ETA 4.4 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1100/2035 (3.73 batch/s, ETA 4.2 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1150/2035 (3.73 batch/s, ETA 4.0 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1200/2035 (3.73 batch/s, ETA 3.7 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1250/2035 (3.73 batch/s, ETA 3.5 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1300/2035 (3.73 batch/s, ETA 3.3 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1350/2035 (3.73 batch/s, ETA 3.1 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1400/2035 (3.73 batch/s, ETA 2.8 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1450/2035 (3.73 batch/s, ETA 2.6 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1500/2035 (3.72 batch/s, ETA 2.4 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1550/2035 (3.72 batch/s, ETA 2.2 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1600/2035 (3.71 batch/s, ETA 2.0 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1650/2035 (3.71 batch/s, ETA 1.7 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1700/2035 (3.70 batch/s, ETA 1.5 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1750/2035 (3.70 batch/s, ETA 1.3 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1800/2035 (3.69 batch/s, ETA 1.1 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1850/2035 (3.69 batch/s, ETA 0.8 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1900/2035 (3.69 batch/s, ETA 0.6 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 1950/2035 (3.69 batch/s, ETA 0.4 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 2000/2035 (3.69 batch/s, ETA 0.2 min) loss_corrente=0.0000
+    [epoch 2/50 train] batch 2035/2035 (3.70 batch/s, ETA 0.0 min) loss_corrente=0.0000
+    [epoch 2/50 val] batch 50/362 (8.69 batch/s, ETA 0.6 min) loss_corrente=0.0000
+    [epoch 2/50 val] batch 100/362 (8.79 batch/s, ETA 0.5 min) loss_corrente=0.0000
+    [epoch 2/50 val] batch 150/362 (8.82 batch/s, ETA 0.4 min) loss_corrente=0.0000
+    [epoch 2/50 val] batch 200/362 (8.85 batch/s, ETA 0.3 min) loss_corrente=0.0000
+    [epoch 2/50 val] batch 250/362 (8.87 batch/s, ETA 0.2 min) loss_corrente=0.0000
+    [epoch 2/50 val] batch 300/362 (8.88 batch/s, ETA 0.1 min) loss_corrente=0.0000
+    [epoch 2/50 val] batch 350/362 (8.88 batch/s, ETA 0.0 min) loss_corrente=0.0000
+    [epoch 2/50 val] batch 362/362 (8.90 batch/s, ETA 0.0 min) loss_corrente=0.0000
+Epoch   2/50 | train_loss=0.0000 train_acc=1.000 | val_loss=0.0000 val_acc=1.000
+    [epoch 3/50 train] batch 50/2035 (3.69 batch/s, ETA 9.0 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 100/2035 (3.71 batch/s, ETA 8.7 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 150/2035 (3.71 batch/s, ETA 8.5 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 200/2035 (3.72 batch/s, ETA 8.2 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 250/2035 (3.72 batch/s, ETA 8.0 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 300/2035 (3.72 batch/s, ETA 7.8 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 350/2035 (3.73 batch/s, ETA 7.5 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 400/2035 (3.73 batch/s, ETA 7.3 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 450/2035 (3.73 batch/s, ETA 7.1 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 500/2035 (3.73 batch/s, ETA 6.9 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 550/2035 (3.73 batch/s, ETA 6.6 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 600/2035 (3.73 batch/s, ETA 6.4 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 650/2035 (3.73 batch/s, ETA 6.2 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 700/2035 (3.73 batch/s, ETA 6.0 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 750/2035 (3.73 batch/s, ETA 5.7 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 800/2035 (3.73 batch/s, ETA 5.5 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 850/2035 (3.73 batch/s, ETA 5.3 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 900/2035 (3.73 batch/s, ETA 5.1 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 950/2035 (3.73 batch/s, ETA 4.8 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1000/2035 (3.73 batch/s, ETA 4.6 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1050/2035 (3.73 batch/s, ETA 4.4 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1100/2035 (3.73 batch/s, ETA 4.2 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1150/2035 (3.73 batch/s, ETA 4.0 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1200/2035 (3.73 batch/s, ETA 3.7 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1250/2035 (3.73 batch/s, ETA 3.5 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1300/2035 (3.73 batch/s, ETA 3.3 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1350/2035 (3.73 batch/s, ETA 3.1 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1400/2035 (3.73 batch/s, ETA 2.8 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1450/2035 (3.73 batch/s, ETA 2.6 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1500/2035 (3.73 batch/s, ETA 2.4 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1550/2035 (3.73 batch/s, ETA 2.2 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1600/2035 (3.73 batch/s, ETA 1.9 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1650/2035 (3.73 batch/s, ETA 1.7 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1700/2035 (3.73 batch/s, ETA 1.5 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1750/2035 (3.73 batch/s, ETA 1.3 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1800/2035 (3.73 batch/s, ETA 1.0 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1850/2035 (3.73 batch/s, ETA 0.8 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1900/2035 (3.73 batch/s, ETA 0.6 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 1950/2035 (3.73 batch/s, ETA 0.4 min) loss_corrente=0.0000
+    [epoch 3/50 train] batch 2000/2035 (3.73 batch/s, ETA 0.2 min) loss_corrente=0.0000

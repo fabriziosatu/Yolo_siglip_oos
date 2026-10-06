@@ -1,0 +1,23 @@
+==================================================
+Job: oos_yolo_loss_magnitude
+Data: Mon Jul 20 05:16:32 PM CEST 2026
+Nodo: ainode01
+Cartella: /home/F.SATURNINO/Progetto_tesi_SigLIP
+Python: /home/F.SATURNINO/.conda/envs/oos/bin/python
+==================================================
+NVIDIA H100 80GB HBM3, 81559 MiB
+[aug] 136 epoche trovate in weights/fase1_baseline/aug/results.csv
+[aug] Statistiche salvate in results/fase1_loss_magnitude/aug/yolo_loss_magnitude.txt
+[aug] Grafico salvato in results/fase1_loss_magnitude/aug/yolo_loss_curves.png
+[no_aug] 56 epoche trovate in weights/fase1_baseline/no_aug/results.csv
+[no_aug] Statistiche salvate in results/fase1_loss_magnitude/no_aug/yolo_loss_magnitude.txt
+[no_aug] Grafico salvato in results/fase1_loss_magnitude/no_aug/yolo_loss_curves.png
+[Confronto] Tabella salvata in results/fase1_loss_magnitude/comparison_L_YOLO.txt
+[Confronto] Grafico salvato in results/fase1_loss_magnitude/comparison_L_YOLO.png
+
+=== RIEPILOGO CONFRONTO (convergenza) ===
+aug        train_mean=1.2287  val_mean=1.8610
+no_aug     train_mean=0.6407  val_mean=2.5755
+==================================================
+Job completato: Mon Jul 20 05:16:36 PM CEST 2026
+==================================================

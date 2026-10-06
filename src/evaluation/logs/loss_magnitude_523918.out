@@ -1,0 +1,11 @@
+==================================================
+Job: oos_yolo_loss_magnitude
+Data: Fri Jul 24 12:34:44 PM CEST 2026
+Nodo: ainode01
+Cartella: /home/F.SATURNINO/Progetto_tesi_SigLIP
+Python: /home/F.SATURNINO/.conda/envs/oos/bin/python
+==================================================
+NVIDIA H100 80GB HBM3, 81559 MiB
+==================================================
+Job completato: Fri Jul 24 12:34:46 PM CEST 2026
+==================================================

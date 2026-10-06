@@ -1,0 +1,2 @@
+Loading weights:   0%|          | 0/1096 [00:00<?, ?it/s]Loading weights:  29%|██▉       | 317/1096 [00:00<00:00, 3084.38it/s]Loading weights:  57%|█████▋    | 626/1096 [00:00<00:00, 2328.42it/s]Loading weights:  79%|███████▉  | 870/1096 [00:00<00:00, 1672.82it/s]Loading weights:  96%|█████████▋| 1056/1096 [00:00<00:00, 1697.77it/s]Loading weights: 100%|██████████| 1096/1096 [00:00<00:00, 1847.86it/s]
+slurmstepd: error: *** JOB 523709 ON ainode02 CANCELLED AT 2026-07-23T20:18:31 ***

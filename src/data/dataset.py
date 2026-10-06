@@ -1,30 +1,30 @@
 """
 src/data/dataset.py
 ====================
-Dataset PyTorch per il caricamento di immagini e label.
+PyTorch Dataset for loading images and labels.
 
-Supporta due modalità operative:
+Supports two operational modes:
 
-  mode='phase1'  — solo positivi (empty_shelf annotati)
-                   Usato per il training standalone di YOLO (Fase 1)
-                   e per val/test in entrambe le fasi.
+  mode='phase1'  — positives only (annotated empty_shelves)
+                   Used for standalone YOLO training (Phase 1)
+                   and for val/test in both phases.
 
-  mode='phase2'  — positivi + negativi bilanciati dinamicamente
-                   Usato per il training della pipeline joint (Fase 2).
-                   Ad ogni epoca viene campionato un sottoinsieme di
-                   negativi pari al numero di positivi (rapporto 1:1).
-                   I negativi ruotano tra le epoche.
+  mode='phase2'  — positives + dynamically balanced negatives
+                   Used for training the joint pipeline (Phase 2).
+                   At each epoch, a subset of negatives equal to the
+                   number of positives is sampled (1:1 ratio).
+                   Negatives rotate across epochs.
 
-Ogni campione restituisce sempre almeno:
-  - image:        Tensor [3, H, W] normalizzato in [0,1]
-  - boxes:        Tensor [N, 4] formato YOLO (xc, yc, w, h)
-  - labels:       Tensor [N]   tutti 0 (empty_shelf)
+Each sample always returns at least:
+  - image:        Tensor [3, H, W] normalized in [0,1]
+  - boxes:        Tensor [N, 4] YOLO format (xc, yc, w, h)
+  - labels:       Tensor [N]   all 0 (empty_shelf)
   - image_path:   str
   - is_negative:  bool
 
-In phase2 aggiunge:
-  - neg_image:       Tensor [3, H, W]  immagine negativa abbinata
-  - neg_boxes:       Tensor [M, 4]     box prodotti (x1n y1n x2n y2n)
+In phase2 it adds:
+  - neg_image:       Tensor [3, H, W]  paired negative image
+  - neg_boxes:       Tensor [M, 4]     product boxes (x1n y1n x2n y2n)
   - neg_image_path:  str
 """
 
@@ -37,7 +37,7 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 
 
-# ── Costanti ──────────────────────────────────────────────────────────────────
+# ── Constants ─────────────────────────────────────────────────────────────────
 
 DATA_DIR   = Path("data/processed_clean")
 IMG_SUFFIX = {".jpg", ".jpeg", ".png"}
@@ -47,19 +47,19 @@ NEG_SKU_DIR        = DATA_DIR / "negatives" / "sku110k"
 NEG_WEB_DIR        = DATA_DIR / "negatives" / "webmarket"
 
 
-# ── Caricamento pool negativi ─────────────────────────────────────────────────
+# ── Negative pool loading ─────────────────────────────────────────────────────
 
 def _load_negative_pool(sku_img_dir: Path, web_img_dir: Path) -> list:
     """
-    Carica il pool completo di negativi da tutte le sorgenti.
-    Ogni elemento e' un dict con:
-      'img_path'  : Path all'immagine (o None se risolta lazy)
-      'boxes_path': Path al .txt con box prodotto (o None)
+    Loads the complete pool of negatives from all sources.
+    Each element is a dict containing:
+      'img_path'  : Path to the image (or None if resolved lazily)
+      'boxes_path': Path to the .txt with product boxes (or None)
       'source'    : 'confirmed' | 'sku110k' | 'webmarket'
     """
     pool = []
 
-    # 1. Negativi confermati (XML vuoti da video_oos_pepper)
+    # 1. Confirmed negatives (Empty XMLs from video_oos_pepper)
     if NEG_CONFIRMED_FILE.exists():
         for line in NEG_CONFIRMED_FILE.read_text().splitlines():
             p = Path(line.strip())
@@ -95,8 +95,9 @@ def _load_negative_pool(sku_img_dir: Path, web_img_dir: Path) -> list:
 
 def _load_neg_boxes(boxes_path) -> list:
     """
-    Legge un file .txt di negativi.
-    Formato: x1_norm y1_norm x2_norm y2_norm (una box per riga).
+    Reads a .txt file containing negatives.
+    Format: x1_norm y1_norm x2_norm y2_norm (one box per line).
+    Returns a list of tuples representing the boxes.
     """
     if boxes_path is None or not Path(boxes_path).exists():
         return []
@@ -116,16 +117,16 @@ def _load_neg_boxes(boxes_path) -> list:
 
 class ShelfDataset(Dataset):
     """
-    Dataset per il rilevamento di spazi vuoti su scaffali.
+    Dataset for the detection of empty spaces on shelves.
 
     Args:
-        split:       'train', 'val' o 'test'
-        img_size:    dimensione input quadrata (default 640)
-        augment:     augmentazioni (solo train)
-        mode:        'phase1' o 'phase2'
-        data_dir:    cartella root dataset (default: data/processed_clean)
-        sku_img_dir: cartella immagini SKU110K
-        web_img_dir: cartella immagini WebMarket
+        split:       'train', 'val' or 'test'
+        img_size:    square input size (default 640)
+        augment:     augmentations (train only)
+        mode:        'phase1' or 'phase2'
+        data_dir:    dataset root folder (default: data/processed_clean)
+        sku_img_dir: SKU110K images folder
+        web_img_dir: WebMarket images folder
     """
 
     def __init__(
@@ -139,7 +140,7 @@ class ShelfDataset(Dataset):
         web_img_dir=Path("data/raw/WebMarket/images"),
     ):
         assert mode in ("phase1", "phase2"), \
-            f"mode deve essere 'phase1' o 'phase2', ricevuto: '{mode}'"
+            f"mode must be 'phase1' or 'phase2', received: '{mode}'"
 
         self.img_size    = img_size
         self.augment     = augment
@@ -148,9 +149,9 @@ class ShelfDataset(Dataset):
         self.web_img_dir = Path(web_img_dir)
 
         data_dir = Path(data_dir)
-        # Supporta due strutture:
-        #   A) data_dir/images/<split>/  (struttura standard)
-        #   B) data_dir/<split>/images/  (struttura cluster HPC)
+        # Supports two structures:
+        #   A) data_dir/images/<split>/  (standard structure)
+        #   B) data_dir/<split>/images/  (HPC cluster structure)
         if (data_dir / "images" / split).exists():
             img_dir = data_dir / "images" / split
             lbl_dir = data_dir / "labels" / split
@@ -158,7 +159,7 @@ class ShelfDataset(Dataset):
             img_dir = data_dir / split / "images"
             lbl_dir = data_dir / split / "labels"
 
-        # Carica positivi
+        # Load positives
         self.positives = []
         for img_path in sorted(img_dir.glob("*")):
             if img_path.suffix.lower() not in IMG_SUFFIX:
@@ -169,31 +170,31 @@ class ShelfDataset(Dataset):
 
         if not self.positives:
             raise RuntimeError(
-                f"Nessun positivo trovato in {img_dir}. "
-                f"Hai eseguito prepare_dataset.py?"
+                f"No positive found in {img_dir}. "
+                f"Did you run prepare_dataset.py?"
             )
 
-        # Carica pool negativi (solo phase2 e solo train)
+        # Load negative pool (phase2 only and train only)
         self._neg_pool    = []
         self._neg_sampled = []
 
         if mode == "phase2" and split == "train":
             self._neg_pool = _load_negative_pool(self.sku_img_dir, self.web_img_dir)
             if not self._neg_pool:
-                print("  ⚠ ShelfDataset phase2: nessun negativo trovato.")
+                print("  ⚠ ShelfDataset phase2: no negative found.")
             else:
                 self._resample_negatives()
 
         print(f"  ShelfDataset [{split}|{mode}]: "
-              f"{len(self.positives)} positivi, "
-              f"{len(self._neg_sampled)} negativi per epoca")
+              f"{len(self.positives)} positives, "
+              f"{len(self._neg_sampled)} negatives per epoch")
 
-    # ── API pubblica ──────────────────────────────────────────────────────────
+    # ── Public API ────────────────────────────────────────────────────────────
 
     def resample_negatives(self):
         """
-        Ricampiona i negativi per la nuova epoca (rapporto 1:1).
-        Chiamare dal trainer all'inizio di ogni epoca:
+        Resamples the negatives for the new epoch (1:1 ratio).
+        Call from the trainer at the beginning of each epoch:
             train_loader.dataset.resample_negatives()
         """
         if self.mode == "phase2" and self._neg_pool:
@@ -208,7 +209,7 @@ class ShelfDataset(Dataset):
         else:
             return self._load_negative(idx - len(self.positives))
 
-    # ── Metodi privati ────────────────────────────────────────────────────────
+    # ── Private methods ───────────────────────────────────────────────────────
 
     def _resample_negatives(self):
         n = len(self.positives)
@@ -343,7 +344,7 @@ class ShelfDataset(Dataset):
 # ── Collate functions ─────────────────────────────────────────────────────────
 
 def collate_fn(batch):
-    """Collate standard per phase1 — retrocompatibile con il codice esistente."""
+    """Standard collate for phase1 — backward compatible with existing code."""
     return {
         "images":      torch.stack([b["image"]      for b in batch]),
         "boxes":       [b["boxes"]      for b in batch],
@@ -354,22 +355,22 @@ def collate_fn(batch):
 
 def collate_fn_phase2(batch):
     """
-    Collate per phase2.
-    Aggiunge is_negative, neg_images e neg_boxes al batch standard.
-    La JointPipeline usa is_negative per distinguere i sample
-    e assegnare le label GT corrette alle ROI di SigLIP.
+    Collate for phase2.
+    Adds is_negative, neg_images, and neg_boxes to the standard batch.
+    The JointPipeline uses is_negative to distinguish samples
+    and assign the correct GT labels to the SigLIP ROIs.
     """
     return {
-        # Campi standard (compatibili con YOLO e analyze_losses)
+        # Standard fields (compatible with YOLO and analyze_losses)
         "images":      torch.stack([b["image"]  for b in batch]),
         "boxes":       [b["boxes"]  for b in batch],
         "labels":      [b["labels"] for b in batch],
         "image_paths": [b["image_path"] for b in batch],
 
-        # Maschera negativi
+        # Negatives mask
         "is_negative": torch.tensor([b["is_negative"] for b in batch]),
 
-        # Immagini e box negative per SigLIP
+        # Negative images and boxes for SigLIP
         "neg_images":      torch.stack([b["neg_image"]  for b in batch]),
         "neg_boxes":       [b["neg_boxes"] for b in batch],
         "neg_image_paths": [b["neg_image_path"] for b in batch],
@@ -387,13 +388,13 @@ def build_dataloaders(
     web_img_dir = Path("data/raw/WebMarket/images"),
 ):
     """
-    Costruisce i DataLoader per train, val e test.
+    Builds the DataLoaders for train, val, and test.
 
     Args:
-        mode: 'phase1' — training YOLO standalone
-              'phase2' — training pipeline joint con negativi
+        mode: 'phase1' — standalone YOLO training
+              'phase2' — joint pipeline training with negatives
 
-    Uso nel trainer di Fase 2 (all'inizio di ogni epoca):
+    Usage in Phase 2 trainer (at the beginning of each epoch):
         train_loader.dataset.resample_negatives()
     """
     assert mode in ("phase1", "phase2")
@@ -405,7 +406,7 @@ def build_dataloaders(
         web_img_dir = web_img_dir,
     )
 
-    # val e test usano sempre solo positivi per metriche corrette
+    # val and test always use only positives for correct metrics
     train_ds = ShelfDataset("train", augment=True,  mode=mode,     **common)
     val_ds   = ShelfDataset("val",   augment=False, mode="phase1", **common)
     test_ds  = ShelfDataset("test",  augment=False, mode="phase1", **common)
@@ -433,7 +434,7 @@ def build_dataloaders(
     return train_loader, val_loader, test_loader
 
 
-# ── Test rapido ───────────────────────────────────────────────────────────────
+# ── Quick test ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     print("Test phase1...")
@@ -448,8 +449,8 @@ if __name__ == "__main__":
     print(f"  is_negative: {b2['is_negative'].tolist()}")
     print(f"  neg_images:  {b2['neg_images'].shape}")
 
-    print("\nTest resample_negatives (simula inizio nuova epoca)...")
+    print("\nTest resample_negatives (simulates beginning of a new epoch)...")
     tl2.dataset.resample_negatives()
-    print(f"  ✓ {len(tl2.dataset._neg_sampled)} negativi ricampionati")
+    print(f"  ✓ {len(tl2.dataset._neg_sampled)} negatives resampled")
 
     print("\n✓ Dataset OK!")

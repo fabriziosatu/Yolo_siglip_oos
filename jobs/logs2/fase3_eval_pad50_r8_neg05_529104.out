@@ -1,0 +1,584 @@
+==================================================
+Job: oos_fase3_eval_pad50_r8_neg05 (rank=8, padding=0.50, SOLO neg_ratio=0.05)
+Data: Wed Aug  5 04:18:17 PM CEST 2026
+Nodo: ainode01
+==================================================
+NVIDIA H100 80GB HBM3, 81559 MiB
+--- [1/2] evaluate_fase3_siglip.py ---
+
+======================================================================
+  Valutazione pipeline YOLO + SigLIP2 FINE-TUNATO (Fase 3) — griglia completa
+======================================================================
+[1/3] Carico detector aug   <- weights/fase1_baseline/aug/best.pt
+[2/3] Carico detector noaug <- weights/fase1_baseline/no_aug/best.pt
+[3/3] Carico SigLIP2 fine-tunato: 1 checkpoint MLP, 1 checkpoint completi
+  [mlp:r8_neg05_pad50] <- weights/fase3_siglip_lora/fase3_siglip_lora_r8_neg05_pad50/best
+[SigLIP2-MLP] Carico backbone google/siglip2-giant-opt-patch16-384...
+[SigLIP2-MLP] Carico adapter LoRA da weights/fase3_siglip_lora/fase3_siglip_lora_r8_neg05_pad50/best/lora_adapters
+  [full:r8_neg05_pad50] <- weights/fase3_siglip_lora_full/fase3_siglip_lora_full_r8_neg05_pad50/best
+[SigLIP2-Full] Carico backbone google/siglip2-giant-opt-patch16-384...
+[SigLIP2-Full] Carico adapter visual da weights/fase3_siglip_lora_full/fase3_siglip_lora_full_r8_neg05_pad50/best/lora_adapters_visual
+[SigLIP2-Full] Carico adapter text da weights/fase3_siglip_lora_full/fase3_siglip_lora_full_r8_neg05_pad50/best/lora_adapters_text
+
+  Immagini test : 1679
+  CONF          : [0.25, 0.5]
+  IOU           : [0.0, 0.25, 0.5, 0.75]
+  CONFIGURAZIONI: ['mlp_r8_neg05_pad50', 'full_r8_neg05_pad50_simple', 'full_r8_neg05_pad50_context']
+
+Fase 1/2: YOLO inference...
+  conf=0.25: YOLO completato su 1679 immagini
+  conf=0.5: YOLO completato su 1679 immagini
+
+Fase 2/2: SigLIP2 inference (crop con padding)...
+  det=aug  conf=0.25  config='mlp_r8_neg05_pad50'
+    [50/1679] box_tot=75 YES=75 NO=0
+    [100/1679] box_tot=299 YES=297 NO=2
+    [150/1679] box_tot=452 YES=449 NO=3
+    [200/1679] box_tot=532 YES=529 NO=3
+    [250/1679] box_tot=679 YES=674 NO=5
+    [300/1679] box_tot=828 YES=821 NO=7
+    [350/1679] box_tot=946 YES=939 NO=7
+    [400/1679] box_tot=1106 YES=1096 NO=10
+    [450/1679] box_tot=1328 YES=1318 NO=10
+    [500/1679] box_tot=1479 YES=1466 NO=13
+    [550/1679] box_tot=1681 YES=1666 NO=15
+    [600/1679] box_tot=1833 YES=1817 NO=16
+    [650/1679] box_tot=1935 YES=1919 NO=16
+    [700/1679] box_tot=2048 YES=2032 NO=16
+    [750/1679] box_tot=2182 YES=2166 NO=16
+    [800/1679] box_tot=2315 YES=2297 NO=18
+    [850/1679] box_tot=2423 YES=2395 NO=28
+    [900/1679] box_tot=2566 YES=2528 NO=38
+    [950/1679] box_tot=2699 YES=2659 NO=40
+    [1000/1679] box_tot=2859 YES=2816 NO=43
+    [1050/1679] box_tot=3047 YES=3001 NO=46
+    [1100/1679] box_tot=3166 YES=3120 NO=46
+    [1150/1679] box_tot=3313 YES=3263 NO=50
+    [1200/1679] box_tot=3481 YES=3430 NO=51
+    [1250/1679] box_tot=3598 YES=3547 NO=51
+    [1300/1679] box_tot=3747 YES=3693 NO=54
+    [1350/1679] box_tot=3899 YES=3845 NO=54
+    [1400/1679] box_tot=4038 YES=3982 NO=56
+    [1450/1679] box_tot=4276 YES=4220 NO=56
+    [1500/1679] box_tot=4610 YES=4550 NO=60
+    [1550/1679] box_tot=4842 YES=4777 NO=65
+    [1600/1679] box_tot=5047 YES=4981 NO=66
+    [1650/1679] box_tot=5225 YES=5157 NO=68
+    [1679/1679] box_tot=5260 YES=5192 NO=68
+  det=aug  conf=0.25  config='full_r8_neg05_pad50_simple'
+    [50/1679] box_tot=75 YES=75 NO=0
+    [100/1679] box_tot=299 YES=297 NO=2
+    [150/1679] box_tot=452 YES=450 NO=2
+    [200/1679] box_tot=532 YES=530 NO=2
+    [250/1679] box_tot=679 YES=676 NO=3
+    [300/1679] box_tot=828 YES=823 NO=5
+    [350/1679] box_tot=946 YES=938 NO=8
+    [400/1679] box_tot=1106 YES=1097 NO=9
+    [450/1679] box_tot=1328 YES=1318 NO=10
+    [500/1679] box_tot=1479 YES=1469 NO=10
+    [550/1679] box_tot=1681 YES=1670 NO=11
+    [600/1679] box_tot=1833 YES=1820 NO=13
+    [650/1679] box_tot=1935 YES=1922 NO=13
+    [700/1679] box_tot=2048 YES=2035 NO=13
+    [750/1679] box_tot=2182 YES=2169 NO=13
+    [800/1679] box_tot=2315 YES=2300 NO=15
+    [850/1679] box_tot=2423 YES=2397 NO=26
+    [900/1679] box_tot=2566 YES=2535 NO=31
+    [950/1679] box_tot=2699 YES=2667 NO=32
+    [1000/1679] box_tot=2859 YES=2825 NO=34
+    [1050/1679] box_tot=3047 YES=3012 NO=35
+    [1100/1679] box_tot=3166 YES=3131 NO=35
+    [1150/1679] box_tot=3313 YES=3275 NO=38
+    [1200/1679] box_tot=3481 YES=3443 NO=38
+    [1250/1679] box_tot=3598 YES=3560 NO=38
+    [1300/1679] box_tot=3747 YES=3706 NO=41
+    [1350/1679] box_tot=3899 YES=3858 NO=41
+    [1400/1679] box_tot=4038 YES=3996 NO=42
+    [1450/1679] box_tot=4276 YES=4234 NO=42
+    [1500/1679] box_tot=4610 YES=4567 NO=43
+    [1550/1679] box_tot=4842 YES=4795 NO=47
+    [1600/1679] box_tot=5047 YES=4999 NO=48
+    [1650/1679] box_tot=5225 YES=5177 NO=48
+    [1679/1679] box_tot=5260 YES=5212 NO=48
+  det=aug  conf=0.25  config='full_r8_neg05_pad50_context'
+    [50/1679] box_tot=75 YES=75 NO=0
+    [100/1679] box_tot=299 YES=297 NO=2
+    [150/1679] box_tot=452 YES=450 NO=2
+    [200/1679] box_tot=532 YES=530 NO=2
+    [250/1679] box_tot=679 YES=676 NO=3
+    [300/1679] box_tot=828 YES=823 NO=5
+    [350/1679] box_tot=946 YES=938 NO=8
+    [400/1679] box_tot=1106 YES=1097 NO=9
+    [450/1679] box_tot=1328 YES=1318 NO=10
+    [500/1679] box_tot=1479 YES=1469 NO=10
+    [550/1679] box_tot=1681 YES=1670 NO=11
+    [600/1679] box_tot=1833 YES=1820 NO=13
+    [650/1679] box_tot=1935 YES=1922 NO=13
+    [700/1679] box_tot=2048 YES=2035 NO=13
+    [750/1679] box_tot=2182 YES=2169 NO=13
+    [800/1679] box_tot=2315 YES=2300 NO=15
+    [850/1679] box_tot=2423 YES=2397 NO=26
+    [900/1679] box_tot=2566 YES=2535 NO=31
+    [950/1679] box_tot=2699 YES=2667 NO=32
+    [1000/1679] box_tot=2859 YES=2825 NO=34
+    [1050/1679] box_tot=3047 YES=3012 NO=35
+    [1100/1679] box_tot=3166 YES=3131 NO=35
+    [1150/1679] box_tot=3313 YES=3275 NO=38
+    [1200/1679] box_tot=3481 YES=3443 NO=38
+    [1250/1679] box_tot=3598 YES=3560 NO=38
+    [1300/1679] box_tot=3747 YES=3706 NO=41
+    [1350/1679] box_tot=3899 YES=3858 NO=41
+    [1400/1679] box_tot=4038 YES=3996 NO=42
+    [1450/1679] box_tot=4276 YES=4234 NO=42
+    [1500/1679] box_tot=4610 YES=4567 NO=43
+    [1550/1679] box_tot=4842 YES=4795 NO=47
+    [1600/1679] box_tot=5047 YES=4999 NO=48
+    [1650/1679] box_tot=5225 YES=5177 NO=48
+    [1679/1679] box_tot=5260 YES=5212 NO=48
+    [diagnostico, non usato per la decisione] un distrattore avrebbe vinto su 405/5260 box (7.7%)
+          367 ( 90.6%) -> "a blurry out of focus photo of a shelf"
+           33 (  8.1%) -> "a dark, poorly lit shelf far from the camera"
+            5 (  1.2%) -> "a metallic shelf edge or divider, no products visible"
+  det=noaug  conf=0.25  config='mlp_r8_neg05_pad50'
+    [50/1679] box_tot=62 YES=61 NO=1
+    [100/1679] box_tot=222 YES=221 NO=1
+    [150/1679] box_tot=338 YES=337 NO=1
+    [200/1679] box_tot=398 YES=397 NO=1
+    [250/1679] box_tot=529 YES=527 NO=2
+    [300/1679] box_tot=637 YES=634 NO=3
+    [350/1679] box_tot=731 YES=728 NO=3
+    [400/1679] box_tot=837 YES=834 NO=3
+    [450/1679] box_tot=1020 YES=1017 NO=3
+    [500/1679] box_tot=1157 YES=1151 NO=6
+    [550/1679] box_tot=1327 YES=1321 NO=6
+    [600/1679] box_tot=1450 YES=1443 NO=7
+    [650/1679] box_tot=1533 YES=1526 NO=7
+    [700/1679] box_tot=1614 YES=1607 NO=7
+    [750/1679] box_tot=1714 YES=1706 NO=8
+    [800/1679] box_tot=1815 YES=1805 NO=10
+    [850/1679] box_tot=1879 YES=1869 NO=10
+    [900/1679] box_tot=1989 YES=1977 NO=12
+    [950/1679] box_tot=2097 YES=2084 NO=13
+    [1000/1679] box_tot=2214 YES=2201 NO=13
+    [1050/1679] box_tot=2354 YES=2341 NO=13
+    [1100/1679] box_tot=2460 YES=2446 NO=14
+    [1150/1679] box_tot=2580 YES=2565 NO=15
+    [1200/1679] box_tot=2725 YES=2710 NO=15
+    [1250/1679] box_tot=2837 YES=2822 NO=15
+    [1300/1679] box_tot=2943 YES=2927 NO=16
+    [1350/1679] box_tot=3044 YES=3027 NO=17
+    [1400/1679] box_tot=3167 YES=3148 NO=19
+    [1450/1679] box_tot=3395 YES=3376 NO=19
+    [1500/1679] box_tot=3682 YES=3663 NO=19
+    [1550/1679] box_tot=3867 YES=3848 NO=19
+    [1600/1679] box_tot=4030 YES=4010 NO=20
+    [1650/1679] box_tot=4176 YES=4156 NO=20
+    [1679/1679] box_tot=4210 YES=4190 NO=20
+  det=noaug  conf=0.25  config='full_r8_neg05_pad50_simple'
+    [50/1679] box_tot=62 YES=61 NO=1
+    [100/1679] box_tot=222 YES=221 NO=1
+    [150/1679] box_tot=338 YES=337 NO=1
+    [200/1679] box_tot=398 YES=397 NO=1
+    [250/1679] box_tot=529 YES=528 NO=1
+    [300/1679] box_tot=637 YES=632 NO=5
+    [350/1679] box_tot=731 YES=726 NO=5
+    [400/1679] box_tot=837 YES=832 NO=5
+    [450/1679] box_tot=1020 YES=1015 NO=5
+    [500/1679] box_tot=1157 YES=1151 NO=6
+    [550/1679] box_tot=1327 YES=1320 NO=7
+    [600/1679] box_tot=1450 YES=1442 NO=8
+    [650/1679] box_tot=1533 YES=1525 NO=8
+    [700/1679] box_tot=1614 YES=1606 NO=8
+    [750/1679] box_tot=1714 YES=1705 NO=9
+    [800/1679] box_tot=1815 YES=1805 NO=10
+    [850/1679] box_tot=1879 YES=1869 NO=10
+    [900/1679] box_tot=1989 YES=1977 NO=12
+    [950/1679] box_tot=2097 YES=2084 NO=13
+    [1000/1679] box_tot=2214 YES=2201 NO=13
+    [1050/1679] box_tot=2354 YES=2341 NO=13
+    [1100/1679] box_tot=2460 YES=2445 NO=15
+    [1150/1679] box_tot=2580 YES=2565 NO=15
+    [1200/1679] box_tot=2725 YES=2710 NO=15
+    [1250/1679] box_tot=2837 YES=2822 NO=15
+    [1300/1679] box_tot=2943 YES=2928 NO=15
+    [1350/1679] box_tot=3044 YES=3028 NO=16
+    [1400/1679] box_tot=3167 YES=3149 NO=18
+    [1450/1679] box_tot=3395 YES=3377 NO=18
+    [1500/1679] box_tot=3682 YES=3664 NO=18
+    [1550/1679] box_tot=3867 YES=3848 NO=19
+    [1600/1679] box_tot=4030 YES=4010 NO=20
+    [1650/1679] box_tot=4176 YES=4156 NO=20
+    [1679/1679] box_tot=4210 YES=4190 NO=20
+  det=noaug  conf=0.25  config='full_r8_neg05_pad50_context'
+    [50/1679] box_tot=62 YES=61 NO=1
+    [100/1679] box_tot=222 YES=221 NO=1
+    [150/1679] box_tot=338 YES=337 NO=1
+    [200/1679] box_tot=398 YES=397 NO=1
+    [250/1679] box_tot=529 YES=528 NO=1
+    [300/1679] box_tot=637 YES=632 NO=5
+    [350/1679] box_tot=731 YES=726 NO=5
+    [400/1679] box_tot=837 YES=832 NO=5
+    [450/1679] box_tot=1020 YES=1015 NO=5
+    [500/1679] box_tot=1157 YES=1151 NO=6
+    [550/1679] box_tot=1327 YES=1320 NO=7
+    [600/1679] box_tot=1450 YES=1442 NO=8
+    [650/1679] box_tot=1533 YES=1525 NO=8
+    [700/1679] box_tot=1614 YES=1606 NO=8
+    [750/1679] box_tot=1714 YES=1705 NO=9
+    [800/1679] box_tot=1815 YES=1805 NO=10
+    [850/1679] box_tot=1879 YES=1869 NO=10
+    [900/1679] box_tot=1989 YES=1977 NO=12
+    [950/1679] box_tot=2097 YES=2084 NO=13
+    [1000/1679] box_tot=2214 YES=2201 NO=13
+    [1050/1679] box_tot=2354 YES=2341 NO=13
+    [1100/1679] box_tot=2460 YES=2445 NO=15
+    [1150/1679] box_tot=2580 YES=2565 NO=15
+    [1200/1679] box_tot=2725 YES=2710 NO=15
+    [1250/1679] box_tot=2837 YES=2822 NO=15
+    [1300/1679] box_tot=2943 YES=2928 NO=15
+    [1350/1679] box_tot=3044 YES=3028 NO=16
+    [1400/1679] box_tot=3167 YES=3149 NO=18
+    [1450/1679] box_tot=3395 YES=3377 NO=18
+    [1500/1679] box_tot=3682 YES=3664 NO=18
+    [1550/1679] box_tot=3867 YES=3848 NO=19
+    [1600/1679] box_tot=4030 YES=4010 NO=20
+    [1650/1679] box_tot=4176 YES=4156 NO=20
+    [1679/1679] box_tot=4210 YES=4190 NO=20
+    [diagnostico, non usato per la decisione] un distrattore avrebbe vinto su 142/4210 box (3.4%)
+          126 ( 88.7%) -> "a blurry out of focus photo of a shelf"
+           13 (  9.2%) -> "a dark, poorly lit shelf far from the camera"
+            3 (  2.1%) -> "a metallic shelf edge or divider, no products visible"
+  det=aug  conf=0.5  config='mlp_r8_neg05_pad50'
+    [50/1679] box_tot=46 YES=46 NO=0
+    [100/1679] box_tot=209 YES=209 NO=0
+    [150/1679] box_tot=324 YES=323 NO=1
+    [200/1679] box_tot=383 YES=382 NO=1
+    [250/1679] box_tot=514 YES=512 NO=2
+    [300/1679] box_tot=627 YES=624 NO=3
+    [350/1679] box_tot=724 YES=721 NO=3
+    [400/1679] box_tot=860 YES=855 NO=5
+    [450/1679] box_tot=1048 YES=1043 NO=5
+    [500/1679] box_tot=1182 YES=1174 NO=8
+    [550/1679] box_tot=1355 YES=1347 NO=8
+    [600/1679] box_tot=1489 YES=1481 NO=8
+    [650/1679] box_tot=1578 YES=1570 NO=8
+    [700/1679] box_tot=1666 YES=1658 NO=8
+    [750/1679] box_tot=1771 YES=1763 NO=8
+    [800/1679] box_tot=1873 YES=1864 NO=9
+    [850/1679] box_tot=1954 YES=1944 NO=10
+    [900/1679] box_tot=2078 YES=2065 NO=13
+    [950/1679] box_tot=2198 YES=2185 NO=13
+    [1000/1679] box_tot=2341 YES=2328 NO=13
+    [1050/1679] box_tot=2499 YES=2485 NO=14
+    [1100/1679] box_tot=2600 YES=2586 NO=14
+    [1150/1679] box_tot=2725 YES=2710 NO=15
+    [1200/1679] box_tot=2881 YES=2865 NO=16
+    [1250/1679] box_tot=2987 YES=2971 NO=16
+    [1300/1679] box_tot=3107 YES=3088 NO=19
+    [1350/1679] box_tot=3226 YES=3207 NO=19
+    [1400/1679] box_tot=3349 YES=3329 NO=20
+    [1450/1679] box_tot=3576 YES=3556 NO=20
+    [1500/1679] box_tot=3863 YES=3843 NO=20
+    [1550/1679] box_tot=4041 YES=4020 NO=21
+    [1600/1679] box_tot=4208 YES=4186 NO=22
+    [1650/1679] box_tot=4345 YES=4322 NO=23
+    [1679/1679] box_tot=4374 YES=4351 NO=23
+  det=aug  conf=0.5  config='full_r8_neg05_pad50_simple'
+    [50/1679] box_tot=46 YES=46 NO=0
+    [100/1679] box_tot=209 YES=209 NO=0
+    [150/1679] box_tot=324 YES=324 NO=0
+    [200/1679] box_tot=383 YES=383 NO=0
+    [250/1679] box_tot=514 YES=514 NO=0
+    [300/1679] box_tot=627 YES=626 NO=1
+    [350/1679] box_tot=724 YES=722 NO=2
+    [400/1679] box_tot=860 YES=857 NO=3
+    [450/1679] box_tot=1048 YES=1045 NO=3
+    [500/1679] box_tot=1182 YES=1179 NO=3
+    [550/1679] box_tot=1355 YES=1352 NO=3
+    [600/1679] box_tot=1489 YES=1486 NO=3
+    [650/1679] box_tot=1578 YES=1575 NO=3
+    [700/1679] box_tot=1666 YES=1663 NO=3
+    [750/1679] box_tot=1771 YES=1768 NO=3
+    [800/1679] box_tot=1873 YES=1870 NO=3
+    [850/1679] box_tot=1954 YES=1948 NO=6
+    [900/1679] box_tot=2078 YES=2070 NO=8
+    [950/1679] box_tot=2198 YES=2190 NO=8
+    [1000/1679] box_tot=2341 YES=2333 NO=8
+    [1050/1679] box_tot=2499 YES=2491 NO=8
+    [1100/1679] box_tot=2600 YES=2592 NO=8
+    [1150/1679] box_tot=2725 YES=2717 NO=8
+    [1200/1679] box_tot=2881 YES=2873 NO=8
+    [1250/1679] box_tot=2987 YES=2979 NO=8
+    [1300/1679] box_tot=3107 YES=3096 NO=11
+    [1350/1679] box_tot=3226 YES=3215 NO=11
+    [1400/1679] box_tot=3349 YES=3337 NO=12
+    [1450/1679] box_tot=3576 YES=3564 NO=12
+    [1500/1679] box_tot=3863 YES=3851 NO=12
+    [1550/1679] box_tot=4041 YES=4028 NO=13
+    [1600/1679] box_tot=4208 YES=4194 NO=14
+    [1650/1679] box_tot=4345 YES=4331 NO=14
+    [1679/1679] box_tot=4374 YES=4360 NO=14
+  det=aug  conf=0.5  config='full_r8_neg05_pad50_context'
+    [50/1679] box_tot=46 YES=46 NO=0
+    [100/1679] box_tot=209 YES=209 NO=0
+    [150/1679] box_tot=324 YES=324 NO=0
+    [200/1679] box_tot=383 YES=383 NO=0
+    [250/1679] box_tot=514 YES=514 NO=0
+    [300/1679] box_tot=627 YES=626 NO=1
+    [350/1679] box_tot=724 YES=722 NO=2
+    [400/1679] box_tot=860 YES=857 NO=3
+    [450/1679] box_tot=1048 YES=1045 NO=3
+    [500/1679] box_tot=1182 YES=1179 NO=3
+    [550/1679] box_tot=1355 YES=1352 NO=3
+    [600/1679] box_tot=1489 YES=1486 NO=3
+    [650/1679] box_tot=1578 YES=1575 NO=3
+    [700/1679] box_tot=1666 YES=1663 NO=3
+    [750/1679] box_tot=1771 YES=1768 NO=3
+    [800/1679] box_tot=1873 YES=1870 NO=3
+    [850/1679] box_tot=1954 YES=1948 NO=6
+    [900/1679] box_tot=2078 YES=2070 NO=8
+    [950/1679] box_tot=2198 YES=2190 NO=8
+    [1000/1679] box_tot=2341 YES=2333 NO=8
+    [1050/1679] box_tot=2499 YES=2491 NO=8
+    [1100/1679] box_tot=2600 YES=2592 NO=8
+    [1150/1679] box_tot=2725 YES=2717 NO=8
+    [1200/1679] box_tot=2881 YES=2873 NO=8
+    [1250/1679] box_tot=2987 YES=2979 NO=8
+    [1300/1679] box_tot=3107 YES=3096 NO=11
+    [1350/1679] box_tot=3226 YES=3215 NO=11
+    [1400/1679] box_tot=3349 YES=3337 NO=12
+    [1450/1679] box_tot=3576 YES=3564 NO=12
+    [1500/1679] box_tot=3863 YES=3851 NO=12
+    [1550/1679] box_tot=4041 YES=4028 NO=13
+    [1600/1679] box_tot=4208 YES=4194 NO=14
+    [1650/1679] box_tot=4345 YES=4331 NO=14
+    [1679/1679] box_tot=4374 YES=4360 NO=14
+    [diagnostico, non usato per la decisione] un distrattore avrebbe vinto su 223/4374 box (5.1%)
+          193 ( 86.5%) -> "a blurry out of focus photo of a shelf"
+           25 ( 11.2%) -> "a dark, poorly lit shelf far from the camera"
+            5 (  2.2%) -> "a metallic shelf edge or divider, no products visible"
+  det=noaug  conf=0.5  config='mlp_r8_neg05_pad50'
+    [50/1679] box_tot=28 YES=28 NO=0
+    [100/1679] box_tot=141 YES=141 NO=0
+    [150/1679] box_tot=207 YES=207 NO=0
+    [200/1679] box_tot=243 YES=243 NO=0
+    [250/1679] box_tot=337 YES=337 NO=0
+    [300/1679] box_tot=394 YES=394 NO=0
+    [350/1679] box_tot=467 YES=467 NO=0
+    [400/1679] box_tot=543 YES=543 NO=0
+    [450/1679] box_tot=687 YES=687 NO=0
+    [500/1679] box_tot=790 YES=789 NO=1
+    [550/1679] box_tot=901 YES=900 NO=1
+    [600/1679] box_tot=998 YES=997 NO=1
+    [650/1679] box_tot=1060 YES=1059 NO=1
+    [700/1679] box_tot=1115 YES=1114 NO=1
+    [750/1679] box_tot=1192 YES=1191 NO=1
+    [800/1679] box_tot=1264 YES=1262 NO=2
+    [850/1679] box_tot=1295 YES=1293 NO=2
+    [900/1679] box_tot=1371 YES=1369 NO=2
+    [950/1679] box_tot=1449 YES=1446 NO=3
+    [1000/1679] box_tot=1537 YES=1534 NO=3
+    [1050/1679] box_tot=1631 YES=1628 NO=3
+    [1100/1679] box_tot=1705 YES=1702 NO=3
+    [1150/1679] box_tot=1798 YES=1794 NO=4
+    [1200/1679] box_tot=1911 YES=1907 NO=4
+    [1250/1679] box_tot=2006 YES=2002 NO=4
+    [1300/1679] box_tot=2070 YES=2066 NO=4
+    [1350/1679] box_tot=2125 YES=2121 NO=4
+    [1400/1679] box_tot=2209 YES=2204 NO=5
+    [1450/1679] box_tot=2425 YES=2420 NO=5
+    [1500/1679] box_tot=2668 YES=2663 NO=5
+    [1550/1679] box_tot=2803 YES=2798 NO=5
+    [1600/1679] box_tot=2933 YES=2928 NO=5
+    [1650/1679] box_tot=3038 YES=3033 NO=5
+    [1679/1679] box_tot=3057 YES=3052 NO=5
+  det=noaug  conf=0.5  config='full_r8_neg05_pad50_simple'
+    [50/1679] box_tot=28 YES=28 NO=0
+    [100/1679] box_tot=141 YES=141 NO=0
+    [150/1679] box_tot=207 YES=207 NO=0
+    [200/1679] box_tot=243 YES=243 NO=0
+    [250/1679] box_tot=337 YES=337 NO=0
+    [300/1679] box_tot=394 YES=391 NO=3
+    [350/1679] box_tot=467 YES=464 NO=3
+    [400/1679] box_tot=543 YES=540 NO=3
+    [450/1679] box_tot=687 YES=684 NO=3
+    [500/1679] box_tot=790 YES=786 NO=4
+    [550/1679] box_tot=901 YES=897 NO=4
+    [600/1679] box_tot=998 YES=994 NO=4
+    [650/1679] box_tot=1060 YES=1056 NO=4
+    [700/1679] box_tot=1115 YES=1111 NO=4
+    [750/1679] box_tot=1192 YES=1188 NO=4
+    [800/1679] box_tot=1264 YES=1259 NO=5
+    [850/1679] box_tot=1295 YES=1290 NO=5
+    [900/1679] box_tot=1371 YES=1366 NO=5
+    [950/1679] box_tot=1449 YES=1443 NO=6
+    [1000/1679] box_tot=1537 YES=1531 NO=6
+    [1050/1679] box_tot=1631 YES=1625 NO=6
+    [1100/1679] box_tot=1705 YES=1698 NO=7
+    [1150/1679] box_tot=1798 YES=1791 NO=7
+    [1200/1679] box_tot=1911 YES=1904 NO=7
+    [1250/1679] box_tot=2006 YES=1999 NO=7
+    [1300/1679] box_tot=2070 YES=2063 NO=7
+    [1350/1679] box_tot=2125 YES=2118 NO=7
+    [1400/1679] box_tot=2209 YES=2201 NO=8
+    [1450/1679] box_tot=2425 YES=2417 NO=8
+    [1500/1679] box_tot=2668 YES=2660 NO=8
+    [1550/1679] box_tot=2803 YES=2795 NO=8
+    [1600/1679] box_tot=2933 YES=2925 NO=8
+    [1650/1679] box_tot=3038 YES=3030 NO=8
+    [1679/1679] box_tot=3057 YES=3049 NO=8
+  det=noaug  conf=0.5  config='full_r8_neg05_pad50_context'
+    [50/1679] box_tot=28 YES=28 NO=0
+    [100/1679] box_tot=141 YES=141 NO=0
+    [150/1679] box_tot=207 YES=207 NO=0
+    [200/1679] box_tot=243 YES=243 NO=0
+    [250/1679] box_tot=337 YES=337 NO=0
+    [300/1679] box_tot=394 YES=391 NO=3
+    [350/1679] box_tot=467 YES=464 NO=3
+    [400/1679] box_tot=543 YES=540 NO=3
+    [450/1679] box_tot=687 YES=684 NO=3
+    [500/1679] box_tot=790 YES=786 NO=4
+    [550/1679] box_tot=901 YES=897 NO=4
+    [600/1679] box_tot=998 YES=994 NO=4
+    [650/1679] box_tot=1060 YES=1056 NO=4
+    [700/1679] box_tot=1115 YES=1111 NO=4
+    [750/1679] box_tot=1192 YES=1188 NO=4
+    [800/1679] box_tot=1264 YES=1259 NO=5
+    [850/1679] box_tot=1295 YES=1290 NO=5
+    [900/1679] box_tot=1371 YES=1366 NO=5
+    [950/1679] box_tot=1449 YES=1443 NO=6
+    [1000/1679] box_tot=1537 YES=1531 NO=6
+    [1050/1679] box_tot=1631 YES=1625 NO=6
+    [1100/1679] box_tot=1705 YES=1698 NO=7
+    [1150/1679] box_tot=1798 YES=1791 NO=7
+    [1200/1679] box_tot=1911 YES=1904 NO=7
+    [1250/1679] box_tot=2006 YES=1999 NO=7
+    [1300/1679] box_tot=2070 YES=2063 NO=7
+    [1350/1679] box_tot=2125 YES=2118 NO=7
+    [1400/1679] box_tot=2209 YES=2201 NO=8
+    [1450/1679] box_tot=2425 YES=2417 NO=8
+    [1500/1679] box_tot=2668 YES=2660 NO=8
+    [1550/1679] box_tot=2803 YES=2795 NO=8
+    [1600/1679] box_tot=2933 YES=2925 NO=8
+    [1650/1679] box_tot=3038 YES=3030 NO=8
+    [1679/1679] box_tot=3057 YES=3049 NO=8
+    [diagnostico, non usato per la decisione] un distrattore avrebbe vinto su 58/3057 box (1.9%)
+           49 ( 84.5%) -> "a blurry out of focus photo of a shelf"
+            7 ( 12.1%) -> "a dark, poorly lit shelf far from the camera"
+            2 (  3.4%) -> "a metallic shelf edge or divider, no products visible"
+
+Calcolo metriche...
+  aug    mlp_r8_neg05_pad50 conf=0.25 iou=0.0 | TPR=0.936 FPR=0.027 FNR=0.103
+  aug    full_r8_neg05_pad50_simple conf=0.25 iou=0.0 | TPR=0.938 FPR=0.029 FNR=0.101
+  aug    full_r8_neg05_pad50_context conf=0.25 iou=0.0 | TPR=0.938 FPR=0.029 FNR=0.101
+  noaug  mlp_r8_neg05_pad50 conf=0.25 iou=0.0 | TPR=0.764 FPR=0.014 FNR=0.286
+  noaug  full_r8_neg05_pad50_simple conf=0.25 iou=0.0 | TPR=0.765 FPR=0.013 FNR=0.286
+  noaug  full_r8_neg05_pad50_context conf=0.25 iou=0.0 | TPR=0.765 FPR=0.013 FNR=0.286
+  aug    mlp_r8_neg05_pad50 conf=0.25 iou=0.25 | TPR=0.934 FPR=0.029 FNR=0.107
+  aug    full_r8_neg05_pad50_simple conf=0.25 iou=0.25 | TPR=0.936 FPR=0.031 FNR=0.104
+  aug    full_r8_neg05_pad50_context conf=0.25 iou=0.25 | TPR=0.936 FPR=0.031 FNR=0.104
+  noaug  mlp_r8_neg05_pad50 conf=0.25 iou=0.25 | TPR=0.763 FPR=0.014 FNR=0.289
+  noaug  full_r8_neg05_pad50_simple conf=0.25 iou=0.25 | TPR=0.764 FPR=0.013 FNR=0.288
+  noaug  full_r8_neg05_pad50_context conf=0.25 iou=0.25 | TPR=0.764 FPR=0.013 FNR=0.288
+  aug    mlp_r8_neg05_pad50 conf=0.25 iou=0.5 | TPR=0.903 FPR=0.060 FNR=0.134
+  aug    full_r8_neg05_pad50_simple conf=0.25 iou=0.5 | TPR=0.906 FPR=0.061 FNR=0.131
+  aug    full_r8_neg05_pad50_context conf=0.25 iou=0.5 | TPR=0.906 FPR=0.061 FNR=0.131
+  noaug  mlp_r8_neg05_pad50 conf=0.25 iou=0.5 | TPR=0.739 FPR=0.038 FNR=0.311
+  noaug  full_r8_neg05_pad50_simple conf=0.25 iou=0.5 | TPR=0.740 FPR=0.037 FNR=0.311
+  noaug  full_r8_neg05_pad50_context conf=0.25 iou=0.5 | TPR=0.740 FPR=0.037 FNR=0.311
+  aug    mlp_r8_neg05_pad50 conf=0.25 iou=0.75 | TPR=0.749 FPR=0.214 FNR=0.276
+  aug    full_r8_neg05_pad50_simple conf=0.25 iou=0.75 | TPR=0.752 FPR=0.215 FNR=0.273
+  aug    full_r8_neg05_pad50_context conf=0.25 iou=0.75 | TPR=0.752 FPR=0.215 FNR=0.273
+  noaug  mlp_r8_neg05_pad50 conf=0.25 iou=0.75 | TPR=0.612 FPR=0.165 FNR=0.429
+  noaug  full_r8_neg05_pad50_simple conf=0.25 iou=0.75 | TPR=0.613 FPR=0.164 FNR=0.429
+  noaug  full_r8_neg05_pad50_context conf=0.25 iou=0.75 | TPR=0.613 FPR=0.164 FNR=0.429
+  aug    mlp_r8_neg05_pad50 conf=0.5 iou=0.0 | TPR=0.797 FPR=0.010 FNR=0.206
+  aug    full_r8_neg05_pad50_simple conf=0.5 iou=0.0 | TPR=0.798 FPR=0.011 FNR=0.206
+  aug    full_r8_neg05_pad50_context conf=0.5 iou=0.0 | TPR=0.798 FPR=0.011 FNR=0.206
+  noaug  mlp_r8_neg05_pad50 conf=0.5 iou=0.0 | TPR=0.561 FPR=0.005 FNR=0.445
+  noaug  full_r8_neg05_pad50_simple conf=0.5 iou=0.0 | TPR=0.561 FPR=0.004 FNR=0.445
+  noaug  full_r8_neg05_pad50_context conf=0.5 iou=0.0 | TPR=0.561 FPR=0.004 FNR=0.445
+  aug    mlp_r8_neg05_pad50 conf=0.5 iou=0.25 | TPR=0.796 FPR=0.011 FNR=0.209
+  aug    full_r8_neg05_pad50_simple conf=0.5 iou=0.25 | TPR=0.797 FPR=0.012 FNR=0.208
+  aug    full_r8_neg05_pad50_context conf=0.5 iou=0.25 | TPR=0.797 FPR=0.012 FNR=0.208
+  noaug  mlp_r8_neg05_pad50 conf=0.5 iou=0.25 | TPR=0.561 FPR=0.005 FNR=0.447
+  noaug  full_r8_neg05_pad50_simple conf=0.5 iou=0.25 | TPR=0.561 FPR=0.005 FNR=0.447
+  noaug  full_r8_neg05_pad50_context conf=0.5 iou=0.25 | TPR=0.561 FPR=0.005 FNR=0.447
+  aug    mlp_r8_neg05_pad50 conf=0.5 iou=0.5 | TPR=0.780 FPR=0.027 FNR=0.226
+  aug    full_r8_neg05_pad50_simple conf=0.5 iou=0.5 | TPR=0.782 FPR=0.027 FNR=0.225
+  aug    full_r8_neg05_pad50_context conf=0.5 iou=0.5 | TPR=0.782 FPR=0.027 FNR=0.225
+  noaug  mlp_r8_neg05_pad50 conf=0.5 iou=0.5 | TPR=0.547 FPR=0.019 FNR=0.461
+  noaug  full_r8_neg05_pad50_simple conf=0.5 iou=0.5 | TPR=0.547 FPR=0.018 FNR=0.461
+  noaug  full_r8_neg05_pad50_context conf=0.5 iou=0.5 | TPR=0.547 FPR=0.018 FNR=0.461
+  aug    mlp_r8_neg05_pad50 conf=0.5 iou=0.75 | TPR=0.665 FPR=0.142 FNR=0.340
+  aug    full_r8_neg05_pad50_simple conf=0.5 iou=0.75 | TPR=0.666 FPR=0.142 FNR=0.339
+  aug    full_r8_neg05_pad50_context conf=0.5 iou=0.75 | TPR=0.666 FPR=0.142 FNR=0.339
+  noaug  mlp_r8_neg05_pad50 conf=0.5 iou=0.75 | TPR=0.473 FPR=0.093 FNR=0.534
+  noaug  full_r8_neg05_pad50_simple conf=0.5 iou=0.75 | TPR=0.473 FPR=0.093 FNR=0.534
+  noaug  full_r8_neg05_pad50_context conf=0.5 iou=0.75 | TPR=0.473 FPR=0.093 FNR=0.534
+
+[Output] results/fase3_evaluation_pad50_rank8_neg05/metrics_full.json
+[Output] results/fase3_evaluation_pad50_rank8_neg05/metrics_full_summary.txt
+
+Completato.
+==================================================
+Valutazione completata, genero le visualizzazioni: Wed Aug  5 11:01:28 PM CEST 2026
+==================================================
+--- [2/2] visualize_fase3_siglip.py ---
+Configurazioni rilevate nel json: ['full_r8_neg05_pad50_context', 'full_r8_neg05_pad50_simple', 'mlp_r8_neg05_pad50']
+
+==================================================
+  config: full_r8_neg05_pad50_context
+  output: results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_context
+==================================================
+  [1/5] Grafico a barre...
+  [OK] Grafico barre → results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_context/bar_metrics.png
+  [2/5] Tabelle 2a/2b/2c...
+  [OK] Tabella 2a → results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_context/tabella2a_fpr.png
+  [OK] Tabella 2b → results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_context/tabella2b_fnr.png
+  [OK] Tabella 2c → results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_context/tabella2c_tpr.png
+  [3/5] Tabella SigLIP2 vs YOLO (numerica)...
+  [OK] Tabella SigLIP2 vs YOLO -> results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_context/tabella_siglip_vs_yolo.png
+  [4/5] Tabella casistiche (flusso decisionale)...
+  [OK] Tabella casistiche -> results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_context/tabella_casistiche.png
+  [5/5] Tabella distrattori (diagnostica, incrociata con TP/FP reale)...
+  [OK] Tabella distrattori TP/FP -> results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_context/tabella_distrattori.png
+
+==================================================
+  config: full_r8_neg05_pad50_simple
+  output: results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_simple
+==================================================
+  [1/5] Grafico a barre...
+  [OK] Grafico barre → results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_simple/bar_metrics.png
+  [2/5] Tabelle 2a/2b/2c...
+  [OK] Tabella 2a → results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_simple/tabella2a_fpr.png
+  [OK] Tabella 2b → results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_simple/tabella2b_fnr.png
+  [OK] Tabella 2c → results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_simple/tabella2c_tpr.png
+  [3/5] Tabella SigLIP2 vs YOLO (numerica)...
+  [OK] Tabella SigLIP2 vs YOLO -> results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_simple/tabella_siglip_vs_yolo.png
+  [4/5] Tabella casistiche (flusso decisionale)...
+  [OK] Tabella casistiche -> results/fase3_evaluation_pad50_rank8_neg05/vis/full_r8_neg05_pad50_simple/tabella_casistiche.png
+  [5/5] Tabella distrattori (diagnostica, incrociata con TP/FP reale)...
+  [SKIP] Nessun dato distrattori TP/FP per conf=0.25 iou=0.0 — tabella non generata
+
+==================================================
+  config: mlp_r8_neg05_pad50
+  output: results/fase3_evaluation_pad50_rank8_neg05/vis/mlp_r8_neg05_pad50
+==================================================
+  [1/5] Grafico a barre...
+  [OK] Grafico barre → results/fase3_evaluation_pad50_rank8_neg05/vis/mlp_r8_neg05_pad50/bar_metrics.png
+  [2/5] Tabelle 2a/2b/2c...
+  [OK] Tabella 2a → results/fase3_evaluation_pad50_rank8_neg05/vis/mlp_r8_neg05_pad50/tabella2a_fpr.png
+  [OK] Tabella 2b → results/fase3_evaluation_pad50_rank8_neg05/vis/mlp_r8_neg05_pad50/tabella2b_fnr.png
+  [OK] Tabella 2c → results/fase3_evaluation_pad50_rank8_neg05/vis/mlp_r8_neg05_pad50/tabella2c_tpr.png
+  [3/5] Tabella SigLIP2 vs YOLO (numerica)...
+  [OK] Tabella SigLIP2 vs YOLO -> results/fase3_evaluation_pad50_rank8_neg05/vis/mlp_r8_neg05_pad50/tabella_siglip_vs_yolo.png
+  [4/5] Tabella casistiche (flusso decisionale)...
+  [OK] Tabella casistiche -> results/fase3_evaluation_pad50_rank8_neg05/vis/mlp_r8_neg05_pad50/tabella_casistiche.png
+  [5/5] Tabella distrattori (diagnostica, incrociata con TP/FP reale)...
+  [SKIP] Nessun dato distrattori TP/FP per conf=0.25 iou=0.0 — tabella non generata
+
+Tutto salvato in: results/fase3_evaluation_pad50_rank8_neg05/vis/{full_r8_neg05_pad50_context,full_r8_neg05_pad50_simple,mlp_r8_neg05_pad50}
+==================================================
+Job completato: Wed Aug  5 11:01:32 PM CEST 2026
+==================================================

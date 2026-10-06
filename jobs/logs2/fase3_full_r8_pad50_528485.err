@@ -1,0 +1,4 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/1096 [00:00<?, ?it/s]Loading weights:  32%|███▏      | 354/1096 [00:00<00:00, 3509.65it/s]Loading weights:  64%|██████▍   | 705/1096 [00:00<00:00, 2894.17it/s]Loading weights:  92%|█████████▏| 1009/1096 [00:00<00:00, 2926.20it/s]Loading weights: 100%|██████████| 1096/1096 [00:00<00:00, 2897.16it/s]
+/home/F.SATURNINO/.conda/envs/oos/lib/python3.10/site-packages/peft/utils/save_and_load.py:372: UserWarning: Could not find a config file in  - will assume that the vocabulary was not modified.
+  warnings.warn(

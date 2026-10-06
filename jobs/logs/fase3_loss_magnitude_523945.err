@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/F.SATURNINO/Progetto_tesi_SigLIP/src/evaluation/analyze_yolo_loss_magnitude.py", line 351, in <module>
+    main(args)
+  File "/home/F.SATURNINO/Progetto_tesi_SigLIP/src/evaluation/analyze_yolo_loss_magnitude.py", line 324, in main
+    result = analyze_single_run(
+  File "/home/F.SATURNINO/Progetto_tesi_SigLIP/src/evaluation/analyze_yolo_loss_magnitude.py", line 105, in analyze_single_run
+    raise FileNotFoundError(
+FileNotFoundError: Non trovo weights/fase3_siglip_lora_r8/results.csv. Cerca 'results.csv' nella cartella del run di training YOLO (Fase 1) — di solito e' stato copiato insieme ai pesi in weights/fase1_baseline/<aug|no_aug>/.
